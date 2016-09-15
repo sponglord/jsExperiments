@@ -1,0 +1,104 @@
+<!doctype html>
+<meta charset="utf-8">
+<html>
+<head>
+   <title>local_audio_visualizer</title>
+   <script type="text/javascript" src="js/lib/pusher.color.js"></script>
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_fatCircles.js"></script> -->
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_superFatCircles.js"></script> -->
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_intersect.js"></script> -->
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_intersectCircles.js"></script> -->
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_intersectCirclesLines.js"></script> -->
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_intersectLines.js"></script> -->
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_intersectLinesColor.js"></script> -->
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_Lines.js"></script> -->
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_Lines2.js"></script> -->
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_LinesFat.js"></script> -->
+   <!-- <script type="text/javascript" src="js/localAudioVisualiser_rings.js"></script> -->
+    <script type="text/javascript" src="js/utils/Utils.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+    <script type="text/javascript" >
+        (function(){
+
+            vizChange = function(e){
+//                console.log('sel=',e.target);
+               
+                var head = document.getElementsByTagName('head')[0];
+                var script= document.createElement('script');
+                script.type= 'text/javascript';
+                script.src= e.target.value;
+                
+                script.addEventListener('load', function(event) {
+                  
+                    var options = document.getElementsByTagName('option');
+                    var optionText = options[e.target.selectedIndex].innerHTML;
+                  
+                    var instr = document.getElementById('instructions');
+                    instr.innerHTML = 'Drag an audio file to play it locally<br /> and visualise it with: <b><i>'  + optionText + '</i></b>';
+                    
+                    var container = document.getElementById('canvas-container');
+                    container.classList.add('phaseTwo');
+
+                    document.getElementById('canvas').style.display = 'block';
+                  
+                });
+                
+                head.appendChild(script);
+            };
+           
+       })();
+   </script>
+</head>
+<body>
+  <div id="container">
+  <!-- <a href="https://github.com/cbrandolino/local-audio-visualizer"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_white_ffffff.png" alt="Fork me on GitHub"></a> -->
+    <div id="canvas-container">
+      <canvas width=1024 height=500 id="canvas"></canvas>
+      <!--<canvas width=2048 height=20000 id="canvas"></canvas>-->
+      <!-- <canvas width=900 height=500 id="canvas-copy"></canvas> -->    </div>
+    <div id="instructions">
+      <!-- <h2>
+        Drag an audio file to play it locally<br />and visualise it
+      </h2> -->
+      <div class="styled-select">
+          <select id="selector" onchange="vizChange(event);">
+              <option >Select a visualisation effect</option>
+              <option value="js/localAudioVisualiser_songDna_1.js">SongDna_1(pure)</option>
+              <option value="js/localAudioVisualiser_songDna_2.js">SongDna_2(blocks)</option>
+              <option value="js/localAudioVisualiser_songDna_4.js">SongDna_4(spiral)</option>
+              <option value="js/localAudioVisualiser_songDna_5.js">SongDna_5(play)</option>
+              <!--<option value="js/localAudioVisualiser_Circles.js">Circles</option>-->
+              <option value="js/localAudioVisualiser_circles_clean.js">CirclesClean</option>
+              <!--<option value="js/localAudioVisualiser_fatCircles.js">FatCircles</option>-->
+              <option value="js/localAudioVisualiser_fatArcs_clean.js">FatArcsClean</option>
+              <!--<option value="js/localAudioVisualiser_superFatCircles.js">SuperFatCircles</option>-->
+              <option value="js/localAudioVisualiser_superFatCircles_clean.js">SuperFatCirclesClean</option>
+              <!--<option value="js/localAudioVisualiser_intersect.js">Intersects</option>-->
+              <option value="js/localAudioVisualiser_intersectsClean.js">IntersectsClean</option>
+              <!--<option value="js/localAudioVisualiser_intersectCircles.js">Intersects+Circles</option>-->
+              <option value="js/localAudioVisualiser_intersectsCirclesClean.js">Intersects+CirclesClean</option>
+              <!--<option value="js/localAudioVisualiser_intersectCirclesLines.js">Intersects+Circles+Lines</option>-->
+              <option value="js/localAudioVisualiser_intersectsCirclesLinesClean.js">Intersects+Circles+LinesClean</option>
+              <option value="js/localAudioVisualiser_intersectsCirclesLinesClean2.js">Intersects+Circles+LinesClean2</option>
+              <!--<option value="js/localAudioVisualiser_intersectLines.js">Intersects+Lines_White</option>-->
+              <option value="js/localAudioVisualiser_intersectsLinesClean.js">Intersects+LinesClean</option>
+              <!--<option value="js/localAudioVisualiser_intersectLinesColor.js">Intersects+Lines_Colour</option>-->
+              <option value="js/localAudioVisualiser_intersectsLinesColorClean.js">Intersects+Lines_ColourClean</option>
+              <!--<option value="js/localAudioVisualiser_Lines.js">Lines</option>-->
+              <option value="js/localAudioVisualiser_linesClean.js">LinesClean</option>
+              <!--<option value="js/localAudioVisualiser_Lines2.js">LinesShaky</option>-->
+              <!--<option value="js/localAudioVisualiser_LinesFat.js">LinesFat</option>-->
+              <option value="js/localAudioVisualiser_linesFatClean.js">LinesFatClean</option>
+              <option value="js/localAudioVisualiser_rings.js">Rings</option>
+          </select>
+        </div>
+    </div>
+  </div>
+</body>
+<script type="text/javascript" >
+    (function(){
+
+        document.getElementById('canvas').style.display = 'none';
+    })();
+</script>
+</html>
