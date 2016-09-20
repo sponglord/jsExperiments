@@ -253,11 +253,13 @@
         // make radius multiplier between 0.5 & 1 depending on amplitude
         sizeMultiplier = NN.utils.lerp(levelNorm, 0.5, 1)
 
+        var heads = Math.round(NN.utils.randomNumberInRange(0, 1));
+
         canvCtx.beginPath();
-        if(dataIndex%2 === 0){
-            canvCtx.arc(posX, canvH/2, levelVal * sizeMultiplier, randAngle, endAngle, false);
-        }else{
+        if(heads === 1){
             canvCtx.arc(posX, canvH/2, levelVal * sizeMultiplier, endAngle, randAngle, true);
+        }else{
+            canvCtx.arc(posX, canvH/2, levelVal * sizeMultiplier, randAngle, endAngle, false);
         }
         canvCtx.stroke();
 
