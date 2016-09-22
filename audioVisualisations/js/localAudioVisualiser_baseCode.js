@@ -3,7 +3,7 @@
 	var audioCtx, analyserNode, sourceNode, javascriptNode, soundData;
 	var canvCtx, canvW, canvH, centerX, centerY, lastTime, audioPlaying;
 
-    var numBatches = 0, binSize = 60, row = 0;
+    var batchCount = 0, binSize = 60, row = 0;
 
 
     // Number of samples to collect before analyzing data (i.e. triggering the javaScriptNode.onaudioprocess event).
@@ -130,21 +130,21 @@
 
 	function processData(){
 
-        numBatches += 1;
+        batchCount += 1;
 
         var dt = Date.now() - lastTime;
 
-        if(numBatches % batchModulo !== 0){
+        if(batchCount % batchModulo !== 0){
             return;
         }
 
 		if(window.console && console.log){
             console.log('### localAudioVisualiser_songDna_1::draw:: dt=', dt);
-            console.log('### localAudioVisualiser_songDna_1::draw:: visualising batchNum =', numBatches);
+            console.log('### localAudioVisualiser_songDna_1::draw:: visualising batchNum =', batchCount);
         }
         
 
-	    var numVals = soundData.length;// = analyserNode.ftSize / 2
+	    var numSamples = soundData.length;// = analyserNode.ftSize / 2
 
         //////////// DO SOMETHING BEFORE THE LOOP
         canvCtx.fillRect(0, 0, canvW, canvH);
@@ -154,34 +154,34 @@
 
         ///////////////////// BINS ///////////////////////////
         // If processing results as bins e.g to limit number of visualisation objects
-//        var step = Math.floor(numVals / binSize);
+//        var step = Math.floor(numSamples / binSize);
 //
 //        for (var i = 0; i < binSize; i ++){
 //
-//            var dataBinStart = i * step;
+//            var freqBinStart = i * step;
 //
-//            var dataBinEnd = (i + 1) * step;
+//            var freqBinEnd = (i + 1) * step;
 //
 //            var levSum = 0;
 //
 //            // Collect average level for the bin
-//            for(var j = dataBinStart; j < dataBinEnd; j++){
+//            for(var j = freqBinStart; j < freqBinEnd; j++){
 //
 //                var lev = soundData[j];
 //
 //                levSum += lev;
 //            }
 //
-//            var levelVal = levSum / step;
+//            var amplitude = levSum / step;
 //
-//            draw(dataBinStart, levelVal, numVals);
+//            draw(freqBinStart, amplitude, numSamples);
 //        }
 
         //////////////////////////////////// ALL VALUES ////////////////////////////////////////////////////////////////
         // If processing all results
-        for (var i = 0; i < numVals; i ++) {
+        for (var i = 0; i < numSamples; i ++) {
 
-            var drawResult = draw(i, soundData[i], numVals);
+            var drawResult = draw(i, soundData[i], numSamples);
 
             if(!drawResult){
                 continue;
@@ -194,36 +194,36 @@
         row += 1;
 	}
 
-    function draw(dataIndex, levelVal, numVals){
+    function draw(freqIndex, amplitude, numSamples){
 
         ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
         // normalise the amplitude within the possible range
-//        var levelNorm = NN.utils.normalize(levelVal, 0, 255); // re. getByteFrequencyData
-        var levelNorm = NN.utils.normalize(levelVal, analyserNode.minDecibels, analyserNode.maxDecibels); // re. getFloatFrequencyData
+//        var ampNorm = NN.utils.normalize(amplitude, 0, 255); // re. getByteFrequencyData
+        var ampNorm = NN.utils.normalize(amplitude, analyserNode.minDecibels, analyserNode.maxDecibels); // re. getFloatFrequencyData
         //-------------------------------------------------------------------------------
 
         ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
         // if no amplitude - skip. Only works for getByteFrequencyData
-//        if(levelNorm === 0){
+//        if(ampNorm === 0){
 //            return false
 //        }
         //-------------------------------------------------------------------------------
 
         // normalise the frequency within the full frequency range (0 - 1023)
-        var freqNorm = NN.utils.normalize(dataIndex, 0, numVals - 1);
+        var freqNorm = NN.utils.normalize(freqIndex, 0, numSamples - 1);
 
         // interpolate the normalised frequency to a valid hue value (0 - 360 degrees)
         var hue = Math.floor(NN.utils.lerp(freqNorm, 0, 360));
 
         // interpolate the normalised amplitude to values suitable for saturation & brightness
-        var sat = Math.floor(NN.utils.lerp(levelNorm, 75, 100));
-        var bright = Math.floor(NN.utils.lerp(levelNorm, 20, 100));
+        var sat = Math.floor(NN.utils.lerp(ampNorm, 75, 100));
+        var bright = Math.floor(NN.utils.lerp(ampNorm, 20, 100));
 
         var hex = NN.utils.hsvToHEX([hue, sat, bright]);
 
         canvCtx.fillStyle = hex;
 
-        canvCtx.fillRect(dataIndex, row, 1, 1);
+        canvCtx.fillRect(freqIndex, row, 1, 1);
 
         return true;
     }
