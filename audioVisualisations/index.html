@@ -10,53 +10,51 @@
 
             vizChange = function(e){
 //                console.log('sel=',e.target);
-               
+
                 var head = document.getElementsByTagName('head')[0];
                 var script= document.createElement('script');
                 script.type= 'text/javascript';
                 script.src= e.target.value;
-                
+
                 script.addEventListener('load', function(event) {
-                  
+
                     var options = document.getElementsByTagName('option');
                     var optionText = options[e.target.selectedIndex].innerHTML;
-                  
+
                     var instr = document.getElementById('instructions');
                     instr.innerHTML = 'Drag an audio file to play it locally<br /> and visualise it with: <b><i>'  + optionText + '</i></b>';
-                    
+
                     var container = document.getElementById('canvas-container');
                     container.classList.add('phaseTwo');
 
                     document.getElementById('canvas').style.display = 'block';
-                  
+
                 });
-                
+
                 head.appendChild(script);
             };
-           
+
        })();
    </script>
 </head>
 <body>
   <div id="container">
     <div id="canvas-container">
-      <canvas width=1024 height=500 id="canvas"></canvas>
-      <!--<canvas width=2048 height=20000 id="canvas"></canvas>-->
-      <!-- <canvas width=900 height=500 id="canvas-copy"></canvas> -->    </div>
+      <!--<canvas width=1024 height=500 id="canvas"></canvas>-->
+      <canvas width=3000 height=3000 id="canvas"></canvas>
+    </div>
     <div id="instructions">
-      <!-- <h2>
-        Drag an audio file to play it locally<br />and visualise it
-      </h2> -->
       <div class="styled-select">
           <select id="selector" onchange="vizChange(event);">
               <option >Select a visualisation effect</option>
               <option value="js/localAudioVisualiser_songDna_1.js">SongDna_1(pure)</option>
-              <option value="js/localAudioVisualiser_songDna_2.js">SongDna_2(blocks)</option>
-              <option value="js/localAudioVisualiser_songDna_4.js">SongDna_4(spiral)</option>
-              <option value="js/localAudioVisualiser_songDna_5.js">SongDna_5(play)</option>
+              <option value="js/localAudioVisualiser_songDna_2_blocks.js">SongDna_2(blocks)</option>
+              <option value="js/localAudioVisualiser_songDna_3_circles.js">SongDna_3(circles)</option>
+              <option value="js/localAudioVisualiser_songDna_4_arcs.js">SongDna_4(arcs)</option>
+              <option value="js/localAudioVisualiser_songDna_5.js">SongDna_5(spiral)</option>
+              <option value="js/localAudioVisualiser_songDna_5_batch.js">SongDna_5(spiral_batch)</option>
+              <option value="js/localAudioVisualiser_songDna_6.js">SongDna_6(play)</option>
               <option value="js/localAudioVisualiser_circles.js">Circles</option>
-              <!--<option value="js/localAudioVisualiser_circles2.js">Circles2</option>-->
-              <!--<option value="js/localAudioVisualiser_circles3.js">Circles3</option>-->
               <option value="js/localAudioVisualiser_fatArcs.js">FatArcs</option>
               <option value="js/localAudioVisualiser_superFatCircles_clean.js">SuperFatCircles</option>
               <option value="js/localAudioVisualiser_intersects.js">Intersects</option>
