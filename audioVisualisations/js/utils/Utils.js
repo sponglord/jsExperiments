@@ -1,4 +1,3 @@
-
 var NN = window.NN || {};
 
 NN.utils = {
@@ -409,3 +408,8 @@ NN.utils = {
 
 })();
 
+(function(){
+    window.AudioContext = (function(){
+        return  window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
+    })();
+})();
