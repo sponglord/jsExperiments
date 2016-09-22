@@ -1,9 +1,9 @@
 (function(){
 
     var audioCtx, analyserNode, sourceNode, javascriptNode, soundData;
-    var canvCtx, canvW, canvH, centerX, centerY, lastTime, audioPlaying, disksNum, posX, lastCircle;
+    var canvCtx, canvW, canvH, centerX, centerY, lastTime, audioPlaying, numDisks, posX, lastCircle;
 
-    var numBatches = 0, binSize = 60, row = 0;
+    var batchCount = 0, binSize = 60, row = 0;
     var startPosX = 80, diskWidth = 40; //  where our disks will start & how far apart our discs will be
     var sizeMultiplier = 0.5; // multiplier on the radius of our circles
 
@@ -91,8 +91,8 @@
         centerY = canvH / 2;
 
         // We get the total number of disks to display: width / disk width figuring in the fact we start [x] px in
-        disksNum = Math.ceil(canvW / (diskWidth + Math.floor(startPosX / diskWidth) * 2) );
-        binSize = disksNum;
+        numDisks = Math.ceil(canvW / (diskWidth + Math.floor(startPosX / diskWidth) * 2) );
+        binSize = numDisks;
 
         // Create a new `audioContext`
         audioCtx = new AudioContext();
@@ -137,22 +137,22 @@
 
     function processData(){
 
-        numBatches += 1;
+        batchCount += 1;
 
         var dt = Date.now() - lastTime;
 
-        if(numBatches % batchModulo !== 0){
+        if(batchCount % batchModulo !== 0){
             return;
         }
 
 //		if(window.console && console.log){
 //            console.log('### localAudioVisualiser_songDna_1::draw:: dt=', dt);
-//            console.log('### localAudioVisualiser_songDna_1::draw:: visualising batchNum =', numBatches);
+//            console.log('### localAudioVisualiser_songDna_1::draw:: visualising batchNum =', batchCount);
 //        }
 
 
-//	    var numVals = soundData.length;// = analyserNode.ftSize / 2
-        var numVals = soundData.length / 2;// = 512 the bottom half of the frequency range is of most interest
+//	    var numSamples = soundData.length;// = analyserNode.ftSize / 2
+        var numSamples = soundData.length / 2;// = 512 the bottom half of the frequency range is of most interest
 
 
         //////////// DO SOMETHING BEFORE THE LOOP
@@ -166,34 +166,34 @@
 
         ///////////////////// BINS ///////////////////////////
         // If processing results as bins e.g to limit number of visualisation objects
-        var step = Math.floor(numVals / binSize);
+        var step = Math.floor(numSamples / binSize);
 
         for (var i = 0; i < binSize; i ++){
 
-            var dataBinStart = i * step;
+            var freqBinStart = i * step;
 
-            var dataBinEnd = (i + 1) * step;
+            var freqBinEnd = (i + 1) * step;
 
             var levSum = 0;
 
             // Collect average level for the bin
-            for(var j = dataBinStart; j < dataBinEnd; j++){
+            for(var j = freqBinStart; j < freqBinEnd; j++){
 
                 var lev = soundData[j];
 
                 levSum += lev;
             }
 
-            var levelVal = levSum / step;
+            var amplitude = levSum / step;
 
-            draw(dataBinStart, levelVal, numVals);
+            draw(freqBinStart, amplitude, numSamples);
         }
 
         ////////////////// ALL VALUES ///////////////////////
         // If processing all results
-//        for (var i = 0; i < numVals; i ++) {
+//        for (var i = 0; i < numSamples; i ++) {
 //
-//            var drawResult = draw(i, soundData[i], numVals);
+//            var drawResult = draw(i, soundData[i], numSamples);
 //
 //            if(!drawResult){
 //                continue;
@@ -206,25 +206,25 @@
 //        row += 1;
     }
 
-    function draw(dataIndex, levelVal, numVals){
+    function draw(freqIndex, amplitude, numSamples){
 
 
         ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
         // normalise the amplitude within the possible range
-        var levelNorm = NN.utils.normalize(levelVal, 0, 255); // re. getByteFrequencyData
-        if(levelNorm === 0){
+        var ampNorm = NN.utils.normalize(amplitude, 0, 255); // re. getByteFrequencyData
+        if(ampNorm === 0){
             return false
         }
 
         // normalise the frequency within the full frequency range (0 - 511)
-        var freqNorm = NN.utils.normalize(dataIndex, 0, numVals - 1);
+        var freqNorm = NN.utils.normalize(freqIndex, 0, numSamples - 1);
 
         // hue
         var hue = Math.floor(NN.utils.lerp(freqNorm, 0, 360));
 
         // saturation & brightnesss
-        var sat = Math.floor(NN.utils.lerp(levelNorm, 40, 100));
-        var bright = Math.floor(NN.utils.lerp(levelNorm, 50, 100));
+        var sat = Math.floor(NN.utils.lerp(ampNorm, 40, 100));
+        var bright = Math.floor(NN.utils.lerp(ampNorm, 50, 100));
 
         var hex = NN.utils.hsvToHEX([hue, sat, bright]);
         var hexBright = NN.utils.hsvToHEX([hue, 100, 100]);
@@ -237,13 +237,13 @@
 
         // Draw each disk
         canvCtx.beginPath();
-        canvCtx.arc(posX, canvH/2, levelVal * sizeMultiplier, 0, Math.PI * 2, false);
+        canvCtx.arc(posX, canvH/2, amplitude * sizeMultiplier, 0, Math.PI * 2, false);
         canvCtx.stroke();
 
 
         if(lastCircle){
 
-            var intersect = intersection(posX, canvH/2, levelVal * sizeMultiplier, lastCircle[0], lastCircle[1], lastCircle[2]);
+            var intersect = intersection(posX, canvH/2, amplitude * sizeMultiplier, lastCircle[0], lastCircle[1], lastCircle[2]);
 
             if(intersect){
 
@@ -253,7 +253,7 @@
                 canvCtx.strokeStyle = hex;
                 canvCtx.lineWidth = 4;
 
-                var intersectRad = levelVal * (sizeMultiplier / 3);
+                var intersectRad = amplitude * (sizeMultiplier / 3);
 
                 canvCtx.beginPath();
                 canvCtx.arc(intersect[0], intersect[1], intersectRad, 0, Math.PI * 2, false);
@@ -268,8 +268,8 @@
                     canvCtx.stroke();
 
                     // Set stroke colour & width for connecting lines
-                    var stroke = Math.floor(NN.utils.lerp(levelNorm, 0, 30));
-                    var alpha =  1.5 -  NN.utils.lerp(levelNorm, 0.5, 1);
+                    var stroke = Math.floor(NN.utils.lerp(ampNorm, 0, 30));
+                    var alpha =  1.5 -  NN.utils.lerp(ampNorm, 0.5, 1);
                     canvCtx.strokeStyle = 'rgba(' + rgb[0] + ','  + rgb[1] + ',' + rgb[2] + ',' + alpha + ')';
                     canvCtx.lineWidth = stroke;
 
@@ -283,12 +283,12 @@
             }
         }
 
-        lastCircle = [posX, canvH/2, levelVal * sizeMultiplier];
+        lastCircle = [posX, canvH/2, amplitude * sizeMultiplier];
 
         posX += diskWidth;
 
 //        if(window.console && console.log){
-//            console.log('### localAudioVisualiser_circles_clean::draw:: dataIndex=', dataIndex, ' levelVal=', levelVal, ' posX=', posX, 'hex=', hex);
+//            console.log('### localAudioVisualiser_circles_clean::draw:: freqIndex=', freqIndex, ' amplitude=', amplitude, ' posX=', posX, 'hex=', hex);
 //        }
 
         return true;

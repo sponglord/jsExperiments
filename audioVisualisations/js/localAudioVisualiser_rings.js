@@ -1,9 +1,9 @@
 (function(){
+	
+	var audioCtx, analyserNode, sourceNode, javascriptNode, soundData;
+	var canvCtx, canvW, canvH, centerX, centerY, lastTime, audioPlaying, numDisks, posX, maxStroke;
 
-    var audioCtx, analyserNode, sourceNode, javascriptNode, soundData;
-    var canvCtx, canvW, canvH, centerX, centerY, lastTime, audioPlaying, disksNum, posX, lastCircle;
-
-    var batchCount = 0, binSize = 60, row = 0;
+    var batchCount = 0, binSize = 60, spacer = 0;
     var startPosX = 80, diskWidth = 40; //  where our disks will start & how far apart our discs will be
     var sizeMultiplier = 0.5; // multiplier on the radius of our circles
 
@@ -20,7 +20,7 @@
     // and using batchModulo to limit drawing cycles means the timestamps between 2 plays of the audio are close enough to one another to produce very similar (tho' not absolutely identical) results.
 
 
-    // Set up drag &  drop
+	// Set up drag &  drop
     var element = document.getElementById('container');
     dropAndLoad(element, init, "ArrayBuffer");
 
@@ -43,7 +43,7 @@
         // If 0 is set, there is no averaging done, whereas a value of 1 means "overlap the previous and current buffer quite a lot while computing the value",
         // which essentially smoothes the changes across AnalyserNode.getFloatFrequencyData/AnalyserNode.getByteFrequencyData calls.
         // In technical terms, we apply a Blackman window and smooth the values over time. The default value is good enough for most cases.
-        analyserNode.smoothingTimeConstant = 0.9;// defaults to 0.8
+        analyserNode.smoothingTimeConstant = 0.8;// defaults to 0.8
 
 //        analyserNode.fftSize = 1024; // defaults to 2048
 
@@ -70,32 +70,34 @@
         javascriptNode.connect(audioCtx.destination);
     }
 
-    // Once the file is loaded, we start getting our hands dirty.
-    function init(pArrayBuffer) {
+	// Once the file is loaded, we start getting our hands dirty.
+	function init(pArrayBuffer) {
+		
+  		document.getElementById('instructions').innerHTML = 'Loading ...';
+  		document.getElementById('canvas-container').classList.remove('phaseTwo');
+  		
+  		// Canvas and drawing config
+		var canvas = document.getElementById('canvas');
+	  	canvCtx = canvas.getContext("2d");
 
-        document.getElementById('instructions').innerHTML = 'Loading ...';
-        document.getElementById('canvas-container').classList.remove('phaseTwo');
+	  	canvCtx.lineWidth = 1;
+	  	canvCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
 
-        // Canvas and drawing config
-        var canvas = document.getElementById('canvas');
-        canvCtx = canvas.getContext("2d");
+        maxStroke = 10;
 
-        canvCtx.lineWidth = 0;
-        canvCtx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-        canvCtx.strokeStyle = 'rgba(255, 255, 255, 1)';
-
-        canvW = canvas.width;
-        canvH = canvas.height;
+		canvW = canvas.width;
+		canvH = canvas.height;
 
         centerX = canvW / 2;
         centerY = canvH / 2;
 
-        // We get the total number of disks to display: width / disk width figuring in the fact we start [x] px in
-        disksNum = Math.ceil(canvW / (diskWidth + Math.floor(startPosX / diskWidth) * 2) );
-        binSize = disksNum;
+        startPosX = centerX; // where our disks will start
 
-        // Create a new `audioContext`
-        audioCtx = new AudioContext();
+        // We get the total number of disks to display: width / disk width figuring in the fact we start [x] px in
+        binSize = numDisks = 60;//Math.ceil(canvW / (diskWidth + Math.floor(startPosX / diskWidth) * 2) );
+
+  		// Create a new `audioContext`
+  		audioCtx = new AudioContext();
 
         // Set up the audio Analyser, the Source Buffer and javascriptNode
         setupAudioNodes();
@@ -133,9 +135,18 @@
         }
 
         decodeAndPlay(pArrayBuffer);
-    }
+	}
 
-    function processData(){
+    // numBatches --> batchCount
+    // disksNum --> numDisks
+    // numVals --> numSamples
+    // dataBinStart --> freqBinStart
+    // dataBinEnd --> freqBinEnd
+    // dataIndex --> freqIndex
+    // levelVal --> amplitude
+    // levelNorm --> ampNorm
+
+	function processData(){
 
         batchCount += 1;
 
@@ -149,16 +160,14 @@
 //            console.log('### localAudioVisualiser_songDna_1::draw:: dt=', dt);
 //            console.log('### localAudioVisualiser_songDna_1::draw:: visualising batchNum =', batchCount);
 //        }
-
+        
 
 //	    var numSamples = soundData.length;// = analyserNode.ftSize / 2
-        var numSamples = soundData.length / 2;// = 512 the bottom half of the frequency range is of most interest
+	    var numSamples = soundData.length / 2;// = 512 the bottom half of the frequency range is of most interest
 
 
         //////////// DO SOMETHING BEFORE THE LOOP
-        posX = startPosX;
-        lastCircle = null;
-        canvCtx.fillStyle = 'rgba(0, 0, 0, 0.25)';// to fill instead of stroke
+        spacer = 0;
         canvCtx.fillRect(0, 0, canvW, canvH);
 
 
@@ -184,9 +193,9 @@
                 levSum += lev;
             }
 
-            var amplitude = levSum / step;
+            var avgAmp = levSum / step;
 
-            draw(freqBinStart, amplitude, numSamples);
+            draw(freqBinStart, avgAmp, numSamples, i);
         }
 
         ////////////////// ALL VALUES ///////////////////////
@@ -204,143 +213,73 @@
 
         //////////// DO SOMETHING AFTER THE LOOP
 //        row += 1;
-    }
+	}
 
-    function draw(freqIndex, amplitude, numSamples){
+    function draw(freqIndex, amplitude, numSamples, i){
 
 
         ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
         // normalise the amplitude within the possible range
         var ampNorm = NN.utils.normalize(amplitude, 0, 255); // re. getByteFrequencyData
         if(ampNorm === 0){
-            return false
+            return false;
         }
+
+//        var ampNorm = NN.utils.normalize(amplitude, analyserNode.minDecibels, analyserNode.maxDecibels); // re. getFloatFrequencyData
+        //-------------------------------------------------------------------------------
 
         // normalise the frequency within the full frequency range (0 - 511)
         var freqNorm = NN.utils.normalize(freqIndex, 0, numSamples - 1);
 
-        // hue
+        // hue - based on frequency
         var hue = Math.floor(NN.utils.lerp(freqNorm, 0, 360));
 
-        // saturation & brightnesss
-        var sat = Math.floor(NN.utils.lerp(ampNorm, 40, 100));
-        var bright = Math.floor(NN.utils.lerp(ampNorm, 50, 100));
+        // saturation & brightnesss - based on amplitude
+        var sat = Math.floor(NN.utils.lerp(ampNorm, 75, 100));
+        var bright = Math.floor(NN.utils.lerp(ampNorm, 50, 75));
 
         var hex = NN.utils.hsvToHEX([hue, sat, bright]);
-        var hexBright = NN.utils.hsvToHEX([hue, 100, 100]);
-
         canvCtx.strokeStyle = hex;
 
-        // Draw each disk
-        canvCtx.beginPath();
-        canvCtx.arc(posX, canvH/2, amplitude * sizeMultiplier, 0, Math.PI * 2, false);
-        canvCtx.stroke();
+        // stroke width - based on amplitude
+        var stroke = Math.floor(NN.utils.lerp(ampNorm, 0, maxStroke));
+        canvCtx.lineWidth = stroke;
 
-        if(lastCircle){
 
-            var intersect = intersection(posX, canvH/2, amplitude * sizeMultiplier, lastCircle[0], lastCircle[1], lastCircle[2]);
+        // Create start & angles for the arc...
 
-            if(intersect){
+        // Stagger start point - gives value between -0.5 & 0.5 (equiv to ±30 degrees)
+        var startAngle = Math.sin(freqIndex) * 0.5;
 
-                canvCtx.fillStyle = hexBright;// to fill instead of stroke
+        // Extend startAngle round to a maximum of 360 degrees, based on amplitude
+        var angle = NN.utils.lerp(ampNorm, 0, Math.PI * 2);
+        angle += startAngle;
 
-//                canvCtx.strokeStyle = hex;
-
-                canvCtx.beginPath();
-                canvCtx.arc(intersect[0], intersect[1], 2, 0, Math.PI * 2, false);
-//                canvCtx.stroke();
-                canvCtx.fill()// to fill instead of stroke
-
-                if(intersect.length > 2){
-
-                    canvCtx.beginPath();
-                    canvCtx.arc(intersect[2], intersect[3], 2, 0, Math.PI * 2, false);
-//                    canvCtx.stroke();
-                    canvCtx.fill()// to fill instead of stroke
-
-                    // Draw line
-                    canvCtx.beginPath();
-                    canvCtx.moveTo(intersect[0], intersect[1]);
-                    canvCtx.lineTo(intersect[2], intersect[3]);
-                    canvCtx.stroke();
-                }
-
-            }
+        // Start every other arc 180 degrees further on
+        var dir = (i%2 === 0)? true : false;
+        if(dir){
+            startAngle += Math.PI;
+            angle += Math.PI;
         }
 
-        lastCircle = [posX, canvH/2, amplitude * sizeMultiplier];
 
-        posX += diskWidth;
+        // How far from the centre the arc is drawn depends on its frequency
+        var radius = 10  + (freqIndex  * sizeMultiplier);
+
+        // Draw each arc
+        canvCtx.beginPath();
+        canvCtx.arc(startPosX, canvH/2, radius + spacer, startAngle, angle, false);
+        canvCtx.stroke();
+
+        // take into account the previous stroke width so the next arc doesn't overlap this one
+        spacer += stroke;
+
 
 //        if(window.console && console.log){
 //            console.log('### localAudioVisualiser_circles_clean::draw:: freqIndex=', freqIndex, ' amplitude=', amplitude, ' posX=', posX, 'hex=', hex);
 //        }
 
         return true;
-    }
-
-    // from: http://stackoverflow.com/questions/12219802/a-javascript-function-that-returns-the-x-y-points-of-intersection-between-two-ci
-    // see also: http://mathworld.wolfram.com/Circle-CircleIntersection.html
-    // Checks to see if circle 1 (at position x1, y1 with radius r1) intersects
-    // with circle 2 (at position x2, y2 with radius r2).
-    // If it does - an array is returned containing the intersection coords
-    // in the format [intersect_x1, intersect_y1, intersect_x2, intersect_y2].
-    // If the circles are exactly next to each other then they intersect at only one point: [intersect_x1, intersect_y1]
-    function intersection(x1, y1, r1, x2, y2, r2) {
-
-        var a, dx, dy, d, h, rx, ry, rAdd;
-        var x3, y3, onePoint = false;
-
-        // dx and dy are the vertical and horizontal distances between the circle centers.
-        dx = x2 - x1;
-        dy = y2 - y1;
-        rAdd = r1 + r2;
-
-        // Determine the straight-line distance between the centers.
-        d = Math.sqrt((dy*dy) + (dx*dx));
-
-        // Check for solvability.
-        if (d > rAdd) {
-
-            return false;// no solution. circles do not intersect.
-        }
-        if (d < Math.abs(r1 - r2)) {
-
-            return false;// no solution. one circle is contained in the other
-        }
-        if(d === rAdd){
-            onePoint = true;// circles touch at one point
-        }
-
-        /* 'point 2' is the point where the line through the circle
-         * intersection points crosses the line between the circle
-         * centers.
-         * 'point 0' is the centre of the first, left most, circle //nn
-         */
-
-        // Determine the distance from point 0 to point 2.
-        a = ((r1*r1) - (r2*r2) + (d*d)) / (2 * d) ;
-
-        // Determine the coordinates of point 2.
-        x3 = x1 + (dx * a/d);
-        y3 = y1 + (dy * a/d);
-
-        // Determine the distance from point 2 to either of the intersection points.
-        h = Math.sqrt((r1*r1) - (a*a));
-
-        // Now determine the offsets of the intersection points from point 2.
-        rx = -dy * (h/d);
-        ry = dx * (h/d);
-
-        // Determine the absolute intersection points.
-        var xi = x3 + rx;
-        var xi_prime = x3 - rx;
-        var yi = y3 + ry;
-        var yi_prime = y3 - ry;
-
-        if(onePoint) return [xi_prime, yi_prime];
-
-        return [xi_prime, yi_prime, xi, yi];
     }
 
 
@@ -426,11 +365,11 @@
             }
         );
     }
-
+	
 
     // re. http://stackoverflow.com/questions/4364823/how-do-i-obtain-the-frequencies-of-each-value-in-an-fft
     function getFrequencyFromIndex(pIndex){
         return (pIndex * audioCtx.sampleRate) / analyserNode.fftSize; //e.g. (1023 * 44100) / 2048 = 22028.5 Hz
     }
-
+	
 })();
