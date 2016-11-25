@@ -24,6 +24,7 @@ define(
 
                 numBars : 180, // number of 'ticks' around the circle
                 radius : 200, // radius of the initial circle, the point on the circumference is the centre of the tick bar
+                counterClockwise : false, // which wat round to draw the ticks
 
                 lineWidth : 3,
                 linkWidthToAmplitude : false,
