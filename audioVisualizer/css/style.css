@@ -1,0 +1,87 @@
+body{
+    background: #000;
+    font-family: 'Arial, Helvetica, sans-serif'; 
+    font-size: 12px;
+    color: #ccc;  
+}
+
+#container {
+    display: block;
+    margin: 200px auto;
+    width: 1250px;
+    height: 100%;
+    background: #000;
+}
+
+#canvas-container {
+  width: 1250px;
+  height: 500px;
+}
+
+#canvas{
+    margin: 0 auto;
+}
+
+#instructions {
+    position: relative;
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: -300px;
+    padding-bottom: 200px;
+    font-family: Arial, Helvetica, sans-serif; 
+}
+
+.br-input-holder{
+    display: inline-block;
+    opacity: 0.5;
+}
+
+.bit-rate-input{
+    background-color: rgba(255,255,255,0.1);
+    color: #ccc;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.bit-rate-input:focus{
+    outline: none;
+}
+
+.phaseTwo{
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px dashed #666;
+}
+
+.styled-select select {
+    background: transparent;
+    width: 185px;
+    font-size: 12px;
+    line-height: 1;
+    border: 0;
+    padding-left: 5px;
+    height: 18px;
+    -webkit-appearance: none;
+    color: #ccc; 
+}
+
+.styled-select select:focus{
+    outline: none;
+}
+
+.styled-select {
+    width: 185px;
+    text-align: center;
+    height: 18px;
+    overflow: hidden;
+    background: url(arrow.png) no-repeat right #000;
+    border: 1px solid #999;
+    margin: 0 auto;
+}
+
+
+#canvas-copy {
+  opacity: 0.05;
+  -webkit-transform: scaleY(-1);
+  margin-top: -6px;
+}
