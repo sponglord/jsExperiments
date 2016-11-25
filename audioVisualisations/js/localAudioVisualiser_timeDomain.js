@@ -1,22 +1,21 @@
 (function(){
 	
 	var audioCtx, analyserNode, sourceNode, javascriptNode, soundData;
-	var canvCtx, canvW, canvH, centerX, centerY, lastTime, audioPlaying, numDisks, posX;
+	var canvCtx, canvW, canvH, centerX, centerY, numDisks, binSize, posX, oldX, oldY, newX, newY;
 
-    var batchCount = 0, binSize = 60, row = 0;
-    var startPosX = 80, diskWidth = 40; //  where our disks will start & how far apart our discs will be
-    var sizeMultiplier = 0.75; // multiplier on the radius of our circles
+    var Utils = NN.utils;
+    var AudioUtils = NN.audioUtils;
+    
+    var batchCount = 0, row = 0;
 
-    var storeObj = {};
+    var halfwayPointReached = false, elapsedTime = 0;
 
+    var startPosX = 80, diskWidth = 40; //  where our 'disks' will start & how far apart our discs will be
+    var sizeMultiplier = 0.5; // multiplier on the radius of our circles
 
-    for(var i = 0; i < 512; i++){
-        storeObj[i] = NN.utils.randomNumberInRange(0, Math.PI * 2);
-    }
-//
-//    if(window.console && console.log){
-//        console.log('### localAudioVisualiser_fatCircles_clean:::: storeObj=',storeObj);
-//    }
+    // Reduces the number of samples we process from frequencyBinCount to a proportion of that e.g. 1024 * .75 = 768
+    var samplesMultiplier = 1
+
 
 
     // Number of samples to collect before analyzing data (i.e. triggering the javaScriptNode.onaudioprocess event).
@@ -33,7 +32,7 @@
 
 	// Set up drag &  drop
     var element = document.getElementById('container');
-    dropAndLoad(element, init, "ArrayBuffer");
+    AudioUtils.dropAndLoad(element, init, "ArrayBuffer");
 
 
     // Set up the audio Analyser, the Source Buffer and javascriptNode
@@ -54,7 +53,7 @@
         // If 0 is set, there is no averaging done, whereas a value of 1 means "overlap the previous and current buffer quite a lot while computing the value",
         // which essentially smoothes the changes across AnalyserNode.getFloatFrequencyData/AnalyserNode.getByteFrequencyData calls.
         // In technical terms, we apply a Blackman window and smooth the values over time. The default value is good enough for most cases.
-        analyserNode.smoothingTimeConstant = 0.9;// defaults to 0.8
+        analyserNode.smoothingTimeConstant = 0.8;// defaults to 0.8
 
 //        analyserNode.fftSize = 1024; // defaults to 2048
 
@@ -69,10 +68,13 @@
 //        soundData = new Float32Array(analyserNode.frequencyBinCount);
         //-------------------------------------------------------------------------------
 
-
+        console.log('visualiser type=',window.optionText);
         console.log('audioCtx.sampleRate=',audioCtx.sampleRate);
-        console.log('analyserNode.frequencyBinCount=',analyserNode.frequencyBinCount);
         console.log('analyserNode.fftSize=',analyserNode.fftSize);
+        console.log('analyserNode.frequencyBinCount=',analyserNode.frequencyBinCount);
+        console.log('numSamples=',analyserNode.frequencyBinCount * samplesMultiplier);
+        console.log('binSize=',binSize);
+
 
         // Now connect the nodes together
         sourceNode.connect(audioCtx.destination);// comment out to get the visualisation without the audio
@@ -91,14 +93,16 @@
 		var canvas = document.getElementById('canvas');
 	  	canvCtx = canvas.getContext("2d");
 
-	  	canvCtx.lineWidth = 0;
-	  	canvCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        canvCtx.lineWidth = 1;
+        canvCtx.strokeStyle = '#fff';
+	  	canvCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
 
 		canvW = canvas.width;
 		canvH = canvas.height;
 
         centerX = canvW / 2;
         centerY = canvH / 2;
+
 
         // We get the total number of bins/disks based on width / diskWidth figuring in the fact we start [x] px in
         numDisks = Math.ceil( (canvW - startPosX * 2) / diskWidth ) + 1;
@@ -124,7 +128,7 @@
 
             ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
             // Values lie within the range 0 - 255
-            analyserNode.getByteFrequencyData(soundData);
+//            analyserNode.getByteFrequencyData(soundData);
 
             // (the frequencyBinCount frequency bands are spread linearly across the frequency spectrum, from 0...Nyquist frequency of the current AudioContext)
             // "The frequency data are in dB units." re. http://webaudio.github.io/web-audio-api/#widl-AnalyserNode-getFloatFrequencyData-void-Float32Array-array
@@ -132,157 +136,100 @@
 //            analyserNode.getFloatFrequencyData(soundData);
 
             // Looks at the variation in amplitude, or volume, over time
-//            analyserNode.getByteTimeDomainData(soundData);
+            analyserNode.getByteTimeDomainData(soundData);
             //-------------------------------------------------------------------------------
 
             // Now we have the data that we can use for visualization
-            if(audioPlaying){
+            if(AudioUtils.audioPlaying){
 
                 requestAnimationFrame(processData);
             }
         }
 
-        decodeAndPlay(pArrayBuffer);
+        AudioUtils.decodeAndPlay(pArrayBuffer, audioCtx, sourceNode, javascriptNode);
 	}
 
 	function processData(){
 
         batchCount += 1;
 
-        var dt = Date.now() - lastTime;
+        elapsedTime = Date.now() - AudioUtils.lastTime;
+
+        if(elapsedTime > AudioUtils.trackLength / 2){
+            halfwayPointReached = true;
+        }
 
         if(batchCount % batchModulo !== 0){
             return;
         }
 
 //		if(window.console && console.log){
-//            console.log('### localAudioVisualiser_songDna_1::draw:: dt=', dt);
+//            console.log('### localAudioVisualiser_songDna_1::draw:: elapsedTime=', elapsedTime);
 //            console.log('### localAudioVisualiser_songDna_1::draw:: visualising batchNum =', batchCount);
 //        }
-        
 
-//	    var numSamples = soundData.length;// = analyserNode.ftSize / 2
-	    var numSamples = soundData.length / 2;// = 512 the bottom half of the frequency range is of most interest
 
+        var numSamples = soundData.length * samplesMultiplier;
 
         //////////// DO SOMETHING BEFORE THE LOOP
         posX = startPosX;
+
+        canvCtx.fillStyle = '#000';
+//        canvCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
         canvCtx.fillRect(0, 0, canvW, canvH);
 
+        oldX = 0;
 
         ///////////////////// LOOP ///////////////////////////////////////////////////////////////////////////////
 
         ///////////////////// BINS ///////////////////////////
         // If processing results as bins e.g to limit number of visualisation objects
-        var step = Math.floor(numSamples / binSize);
-
-        for (var i = 0; i < binSize; i ++){
-
-            var freqBinStart = i * step;
-
-            var freqBinEnd = (i + 1) * step;
-
-            var levSum = 0;
-
-            // Collect average level for the bin
-            for(var j = freqBinStart; j < freqBinEnd; j++){
-
-                var lev = soundData[j];
-
-                levSum += lev;
-            }
-
-            var amplitude = levSum / step;
-
-            draw(freqBinStart, amplitude, numSamples);
-        }
-
-        ////////////////// ALL VALUES ///////////////////////
-        // If processing all results
-//        for (var i = 0; i < numSamples; i ++) {
+//        var step = Math.floor(numSamples / binSize);
 //
-//            var drawResult = draw(i, soundData[i], numSamples);
+//        for (var i = 0; i < binSize; i ++){
 //
-//            if(!drawResult){
-//                continue;
+//            var freqBinStart = i * step;
+//
+//            var freqBinEnd = (i + 1) * step;
+//
+//            var levSum = 0;
+//
+//            // Collect average level for the bin
+//            for(var j = freqBinStart; j < freqBinEnd; j++){
+//
+//                var lev = soundData[j];
+//
+//                levSum += lev;
 //            }
+//
+//            var amplitude = levSum / step;
+//
+//            draw(freqBinStart, amplitude, numSamples);
 //        }
+
+        //////////////////////////////////// ALL VALUES ////////////////////////////////////////////////////////////////
+        // If processing all results
+        for (var i = 0; i < numSamples; i ++) {
+
+            var drawResult = draw(i, soundData[i], numSamples);
+
+            if(!drawResult){
+                continue;
+            }
+        }
 
         //--------------------------------------------------------------------------------------------------------------
 
         //////////// DO SOMETHING AFTER THE LOOP
-//        row += 1;
+        row += 1;
 	}
 
     function draw(freqIndex, amplitude, numSamples){
 
-
         ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
         // normalise the amplitude within the possible range
-        var ampNorm = NN.utils.normalize(amplitude, 0, 255); // re. getByteFrequencyData
-        if(ampNorm === 0){
-            return false
-        }
-
-//        var ampNorm = NN.utils.normalize(amplitude, analyserNode.minDecibels, analyserNode.maxDecibels); // re. getFloatFrequencyData
-        //-------------------------------------------------------------------------------
-
-        // normalise the frequency within the full frequency range (0 - 511)
-        var freqNorm = NN.utils.normalize(freqIndex, 0, numSamples - 1);
-
-        // hue
-        var hue = Math.floor(NN.utils.lerp(freqNorm, 0, 360));// ex 310??
-
-        // saturation & brightnesss
-        var sat = Math.floor(NN.utils.lerp(ampNorm, 40, 100));
-        var bright = Math.floor(NN.utils.lerp(ampNorm, 50, 100));
-
-        var hex = NN.utils.hsvToHEX([hue, sat, bright]);
-
-        canvCtx.strokeStyle = hex;
-
-        // smaller the amplitude, wider the stroke
-        var stroke = Math.floor(NN.utils.lerp(ampNorm, 0, 30));
-        canvCtx.lineWidth = 30 - stroke;
-
-        // Selected pre-generated random start angle
-        var randAngle = storeObj[freqIndex];
-
-        var endAngle = randAngle + NN.utils.lerp(ampNorm, 0, Math.PI * 2)
-
-        // make radius multiplier between 0.5 & 1 depending on amplitude
-        sizeMultiplier = NN.utils.lerp(ampNorm, 0.5, 1)
-
-        var heads = Math.round(NN.utils.randomNumberInRange(0, 1));
-
-        canvCtx.beginPath();
-        if(heads === 1){
-            canvCtx.arc(posX, canvH/2, amplitude * sizeMultiplier, endAngle, randAngle, true);
-        }else{
-            canvCtx.arc(posX, canvH/2, amplitude * sizeMultiplier, randAngle, endAngle, false);
-        }
-        canvCtx.stroke();
-
-        // Draw each disk
-//        canvCtx.beginPath();
-//        canvCtx.arc(posX, canvH/2, amplitude * sizeMultiplier, randAngle, endAngle, (freqIndex%2 === 0));
-//        canvCtx.stroke();
-
-
-        posX += diskWidth;
-
-//        if(window.console && console.log){
-//            console.log('### localAudioVisualiser_circles_clean::draw:: freqIndex=',freqIndex,' amplitude=',amplitude, ' posX=',posX, 'hex=',hex);
-//        }
-
-        return true;
-
-
-
-        ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
-        // normalise the amplitude within the possible range
-//        var ampNorm = NN.utils.normalize(amplitude, 0, 255); // re. getByteFrequencyData
-        var ampNorm = NN.utils.normalize(amplitude, analyserNode.minDecibels, analyserNode.maxDecibels); // re. getFloatFrequencyData
+//        var ampNorm = Utils.normalize(amplitude, 0, 255); // re. getByteFrequencyData
+//        var ampNorm = Utils.normalize(amplitude, analyserNode.minDecibels, analyserNode.maxDecibels); // re. getFloatFrequencyData
         //-------------------------------------------------------------------------------
 
         ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
@@ -293,112 +240,44 @@
         //-------------------------------------------------------------------------------
 
         // normalise the frequency within the full frequency range (0 - 1023)
-        var col = NN.utils.normalize(freqIndex, 0, numSamples - 1);
+//        var freqNorm = Utils.normalize(freqIndex, 0, numSamples - 1);
+//
+//        // interpolate the normalised frequency to a valid hue value (0 - 360 degrees)
+//        var hue = Math.floor(Utils.lerp(freqNorm, 0, 360));
+//
+//        // interpolate the normalised amplitude to values suitable for saturation & brightness
+//        var sat = Math.floor(Utils.lerp(ampNorm, 75, 100));
+//        var bright = Math.floor(Utils.lerp(ampNorm, 20, 100));
+//
+//        var hex = Utils.hsvToHEX([hue, sat, bright]);
+//
+//        canvCtx.fillStyle = hex;
+//
+//        canvCtx.fillRect(freqIndex, row, 1, 1);
+//        canvCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
 
-        // interpolate the normalised frequency to a valid hue value (0 - 360 degrees)
-        var hue = Math.floor(NN.utils.lerp(col, 0, 360));
 
-        // interpolate the normalised amplitude to values suitable for saturation & brightness
-        var sat = Math.floor(NN.utils.lerp(ampNorm, 75, 100));
-        var bright = Math.floor(NN.utils.lerp(ampNorm, 20, 100));
+        var percent = amplitude / 256;
+        var height = canvH * percent;
+        var offset = canvH - height - 1;
 
-        var hex = NN.utils.hsvToHEX([hue, sat, bright]);
+        // rects
+//        canvCtx.fillStyle = '#fff';
+//        canvCtx.fillRect(freqIndex, offset, 1, 1);
 
-        canvCtx.fillStyle = hex;
+        // lines
+        newX = freqIndex;
+        newY = offset;
 
-        canvCtx.fillRect(freqIndex, row, 1, 1);
+        canvCtx.beginPath();
+        canvCtx.moveTo(oldX, (freqIndex === 0)? newY : oldY);
+        canvCtx.lineTo(newX, newY);
+        canvCtx.stroke()
+
+        oldX = newX;
+        oldY = newY;
 
         return true;
-    }
-
-
-    // Reusable dropAndLoad function: it reads a local file dropped on a
-    // `dropElement` in the DOM in the specified `readFormat`
-    // (In this case, we want an arrayBuffer)
-    function dropAndLoad(dropElement, callback, readFormat) {
-
-        var readFormat = readFormat || "DataUrl";
-
-        dropElement.addEventListener('dragover', function(e) {
-
-            e.stopPropagation();
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
-
-        }, false);
-
-        dropElement.addEventListener('drop', function(e) {
-
-            e.stopPropagation();
-            e.preventDefault();
-            loadFile(e.dataTransfer.files[0], callback, readFormat);
-
-        }, false);
-    }
-
-    function loadFile(file, callback, readFormat) {
-
-        var reader = new FileReader();
-
-        reader.onload = function(e) {
-
-            callback(e.target.result);
-        };
-
-        reader['readAs'+readFormat](file);
-    }
-
-    function decodeAndPlay(pArrayBuffer){
-
-        // Decode the data in our array into an audio buffer
-        audioCtx.decodeAudioData(
-
-            pArrayBuffer,
-
-            function(buffer) {
-
-                // Use the passed data as as our audio source
-                sourceNode.buffer = buffer;
-
-                // Start playing the buffer.
-                sourceNode.start(0);
-                audioPlaying = true;
-
-                lastTime = Date.now();
-
-                document.getElementById('instructions').innerHTML = '';
-
-                // For play/pause fn see code snippets at: http://stackoverflow.com/questions/11506180/web-audio-api-resume-from-pause
-                var canvas = document.getElementById('canvas');
-                canvas.addEventListener('click',function(e) {
-                    e.preventDefault();
-
-                    if(audioPlaying){
-
-                        sourceNode.stop();
-                        audioPlaying = false;
-                    }else{
-
-                        // Can probably be done better - see url above
-//                        setupAudioNodes()
-//                        sourceNode.buffer = buffer;
-//                        sourceNode.start(0);
-//                        audioPlaying = true;
-                    }
-                });
-            },
-
-            function(error){
-                // console.log('decodeAudioData error=',error);
-                document.getElementById('instructions').innerHTML = 'Audio Decode Error - reload the page and try a different file.';
-            }
-        );
-    }
-	
-
-    // re. http://stackoverflow.com/questions/4364823/how-do-i-obtain-the-frequencies-of-each-value-in-an-fft
-    function getFrequencyFromIndex(pIndex){
-        return (pIndex * audioCtx.sampleRate) / analyserNode.fftSize; //e.g. (1023 * 44100) / 2048 = 22028.5 Hz
     }
 	
 })();

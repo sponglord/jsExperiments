@@ -3,9 +3,15 @@
     var audioCtx, analyserNode, sourceNode, javascriptNode, soundData;
     var canvCtx, canvW, canvH, centerX, centerY, lastTime, audioPlaying, numDisks, posX, lastCircle;
 
+    var Utils = NN.utils;
+    var AudioUtils = NN.audioUtils;
+
     var batchCount = 0, binSize = 60, row = 0;
     var startPosX = 80, diskWidth = 40; //  where our disks will start & how far apart our discs will be
     var sizeMultiplier = 0.5; // multiplier on the radius of our circles
+
+    // Reduces the number of samples we process from frequencyBinCount to a proportion of that e.g. 1024 * .75 = 768
+    var samplesMultiplier = 0.5;
 
 
     // Number of samples to collect before analyzing data (i.e. triggering the javaScriptNode.onaudioprocess event).
@@ -22,7 +28,7 @@
 
     // Set up drag &  drop
     var element = document.getElementById('container');
-    dropAndLoad(element, init, "ArrayBuffer");
+    AudioUtils.dropAndLoad(element, init, "ArrayBuffer");
 
 
     // Set up the audio Analyser, the Source Buffer and javascriptNode
@@ -59,9 +65,13 @@
         //-------------------------------------------------------------------------------
 
 
+        console.log('visualiser type=',window.optionText);
         console.log('audioCtx.sampleRate=',audioCtx.sampleRate);
-        console.log('analyserNode.frequencyBinCount=',analyserNode.frequencyBinCount);
         console.log('analyserNode.fftSize=',analyserNode.fftSize);
+        console.log('analyserNode.frequencyBinCount=',analyserNode.frequencyBinCount);
+        console.log('numSamples=',analyserNode.frequencyBinCount * samplesMultiplier);
+        console.log('binSize=',binSize);
+        
 
         // Now connect the nodes together
         sourceNode.connect(audioCtx.destination);// comment out to get the visualisation without the audio
@@ -90,8 +100,8 @@
         centerX = canvW / 2;
         centerY = canvH / 2;
 
-        // We get the total number of disks to display: width / disk width figuring in the fact we start [x] px in
-        numDisks = Math.ceil(canvW / (diskWidth + Math.floor(startPosX / diskWidth) * 2) );
+        // We get the total number of bins/disks based on width / diskWidth figuring in the fact we start [x] px in
+        numDisks = Math.ceil( (canvW - startPosX * 2) / diskWidth ) + 1;
         binSize = numDisks;
 
         // Create a new `audioContext`
@@ -126,20 +136,20 @@
             //-------------------------------------------------------------------------------
 
             // Now we have the data that we can use for visualization
-            if(audioPlaying){
+            if(AudioUtils.audioPlaying){
 
                 requestAnimationFrame(processData);
             }
         }
 
-        decodeAndPlay(pArrayBuffer);
+        AudioUtils.decodeAndPlay(pArrayBuffer, audioCtx, sourceNode, javascriptNode);
     }
 
     function processData(){
 
         batchCount += 1;
 
-        var dt = Date.now() - lastTime;
+        var dt = Date.now() - AudioUtils.lastTime;
 
         if(batchCount % batchModulo !== 0){
             return;
@@ -152,7 +162,7 @@
 
 
 //	    var numSamples = soundData.length;// = analyserNode.ftSize / 2
-        var numSamples = soundData.length / 2;// = 512 the bottom half of the frequency range is of most interest
+        var numSamples = soundData.length * samplesMultiplier;// = 512 the bottom half of the frequency range is of most interest
 
 
         //////////// DO SOMETHING BEFORE THE LOOP
@@ -211,24 +221,24 @@
 
         ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
         // normalise the amplitude within the possible range
-        var ampNorm = NN.utils.normalize(amplitude, 0, 255); // re. getByteFrequencyData
+        var ampNorm = Utils.normalize(amplitude, 0, 255); // re. getByteFrequencyData
         if(ampNorm === 0){
-            return false
+//            return false
         }
 
         // normalise the frequency within the full frequency range (0 - 511)
-        var freqNorm = NN.utils.normalize(freqIndex, 0, numSamples - 1);
+//        var freqNorm = Utils.normalize(freqIndex, 0, numSamples - 1);
 
         // hue
-        var hue = Math.floor(NN.utils.lerp(freqNorm, 0, 360));
-
-        // saturation & brightnesss
-        var sat = Math.floor(NN.utils.lerp(ampNorm, 40, 100));
-        var bright = Math.floor(NN.utils.lerp(ampNorm, 50, 100));
-
-        var hex = NN.utils.hsvToHEX([hue, sat, bright]);
-
-        canvCtx.strokeStyle = hex;
+//        var hue = Math.floor(Utils.lerp(freqNorm, 0, 360));
+//
+//        // saturation & brightnesss
+//        var sat = Math.floor(Utils.lerp(ampNorm, 40, 100));
+//        var bright = Math.floor(Utils.lerp(ampNorm, 50, 100));
+//
+//        var hex = Utils.hsvToHEX([hue, sat, bright]);
+//
+//        canvCtx.strokeStyle = hex;
 
 
         if(lastCircle){
@@ -250,7 +260,7 @@
                     canvCtx.fill();
 
                     // Draw line
-                    canvCtx.strokeStyle = '#fff';
+//                    canvCtx.strokeStyle = '#fff';
 
                     canvCtx.beginPath();
                     canvCtx.moveTo(intersect[0], intersect[1]);

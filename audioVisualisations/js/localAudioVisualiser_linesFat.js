@@ -90,8 +90,8 @@
         centerX = canvW / 2;
         centerY = canvH / 2;
 
-        // We get the total number of disks to display: width / disk width figuring in the fact we start [x] px in
-        numDisks = Math.ceil(canvW / (diskWidth + Math.floor(startPosX / diskWidth) * 2) );
+        // We get the total number of bins/disks based on width / diskWidth figuring in the fact we start [x] px in
+        numDisks = Math.ceil( (canvW - startPosX * 2) / diskWidth ) + 1;
         binSize = numDisks;
 
         // Create a new `audioContext`
@@ -232,7 +232,8 @@
         var stroke = Math.floor(NN.utils.lerp(ampNorm, 0, 100));
         canvCtx.lineWidth = stroke;
 
-        var alpha =  1.1 -  NN.utils.lerp(ampNorm, 0.3, 1);//0.3
+        // link amplitude to alpha, but invert: strongest signal = 0.1, weakest = 1
+        var alpha =  1.1 - NN.utils.lerp(ampNorm, 0.1, 1);//0.3
 
         if(lastCircle){
 
@@ -240,7 +241,7 @@
 
             if(intersect){
 
-                canvCtx.strokeStyle = 'rgba(' + rgb[0] + ','  + rgb[1] + ',' + rgb[2] + ',' + alpha + ')';;
+                canvCtx.strokeStyle = 'rgba(' + rgb[0] + ','  + rgb[1] + ',' + rgb[2] + ',' + alpha + ')';
 
 
                 if(intersect.length > 2){

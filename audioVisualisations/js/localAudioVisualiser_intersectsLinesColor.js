@@ -90,8 +90,8 @@
         centerX = canvW / 2;
         centerY = canvH / 2;
 
-        // We get the total number of disks to display: width / disk width figuring in the fact we start [x] px in
-        numDisks = Math.ceil(canvW / (diskWidth + Math.floor(startPosX / diskWidth) * 2) );
+        // We get the total number of bins/disks based on width / diskWidth figuring in the fact we start [x] px in
+        numDisks = Math.ceil( (canvW - startPosX * 2) / diskWidth ) + 1;
         binSize = numDisks;
 
         // Create a new `audioContext`
@@ -229,7 +229,7 @@
         var hex = NN.utils.hsvToHEX([hue, sat, bright]);
         var hexBright = NN.utils.hsvToHEX([hue, 100, 100]);
 
-        canvCtx.strokeStyle = hex;
+//        canvCtx.strokeStyle = hex;
 
 
         if(lastCircle){

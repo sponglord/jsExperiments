@@ -1,7 +1,7 @@
 (function(){
 
     var audioCtx, analyserNode, sourceNode, javascriptNode, soundData;
-    var canvCtx, canvW, canvH, centerX, centerY, lastTime, audioPlaying, disksNum, posX, lastCircle;
+    var canvCtx, canvW, canvH, centerX, centerY, lastTime, audioPlaying, numDisks, posX, lastCircle;
 
     var batchCount = 0, binSize = 60, row = 0;
     var startPosX = 80, diskWidth = 40; //  where our disks will start & how far apart our discs will be
@@ -90,9 +90,9 @@
         centerX = canvW / 2;
         centerY = canvH / 2;
 
-        // We get the total number of disks to display: width / disk width figuring in the fact we start [x] px in
-        disksNum = Math.ceil(canvW / (diskWidth + Math.floor(startPosX / diskWidth) * 2) );
-        binSize = disksNum;
+        // We get the total number of bins/disks based on width / diskWidth figuring in the fact we start [x] px in
+        numDisks = Math.ceil( (canvW - startPosX * 2) / diskWidth ) + 1;
+        binSize = numDisks;
 
         // Create a new `audioContext`
         audioCtx = new AudioContext();
