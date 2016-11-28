@@ -9,20 +9,19 @@ require.config({
     // never includes a ".js" extension since
     // the paths config could be for a directory.
     paths: {
-        lodash: 'lib/lodash/lodash.4.10.0'
+        lodash: 'lib/lodash/lodash.4.10.0',
+        jquery: 'lib/jquery-3.1.1.min',
+        datgui : '../js/lib/datgui/dat.gui'
     }
 });
 
-//require(['analyser/circles'],
-//    function(Circles){
-//        // dependencies are loaded and can be used here now.
-//
-//        if(window.console && console.log){
-//            console.log('### main::STARTUP:: ');
-//        }
-//
-//        new Circles();
-//    });
+require(['analyser/drawOptions'],
+    function(DrawOptions){
+        // dependencies are loaded and can be used here now.
+
+        var opts = new DrawOptions();
+        opts.init();
+    });
 
 
 
