@@ -3,7 +3,7 @@ define(
     [
         'utils/ObjectSuper',
         'analyser/baseCode',
-        'utils/utils2',
+        'utils/utils2'
     ],
     function(objectSuper,
              baseCode,
@@ -17,14 +17,16 @@ define(
             var defaultOptions = {
                 batchModulo : 1,
                 samplesMultiplier : 0.75,
-                canvasFillStyle : 'rgba(0, 0, 0, 0.25)', //.25 for others, 0.1 for 'lines'
+                canvasFillStyle : [0,0,0],
+                canvasFillAlpha : 0.25, //.25 for others, 0.1 for 'lines'
 
                 // DRAW OPTIONS
                 sizeMultiplier : 0.25,
+                logAmpDivider : 5,
 
                 numBars : 180, // number of 'ticks' around the circle
                 radius : 200, // radius of the initial circle, the point on the circumference is the centre of the tick bar
-                counterClockwise : false, // which wat round to draw the ticks
+                counterClockwise : false, // which way round to draw the ticks - starting at 'midnight'
 
                 lineWidth : 3,
                 linkWidthToAmplitude : false,
@@ -35,9 +37,8 @@ define(
                 brightColors : true,
 
                 linkAlphaToAmplitude : true,
-                invertAlpha : true,
+                invertAlpha : true
 
-                logAmpDivider : 5
             }
 
             var posX = null;
@@ -287,6 +288,43 @@ define(
                 this.canvCtx.lineTo(posX2, posY2 );
                 this.canvCtx.stroke();
             }
+
+            that.optionChange = function(pOpt, pVal){
+
+                __super.optionChange(pOpt, pVal);
+
+                switch(pOpt){
+
+                    case 'numBars':
+
+                        this.options.numBars = pVal;
+
+                        this.numDisks = this.binSize = this.options.numBars;
+
+                        var angle = (Math.PI * 2 ) / this.numDisks;
+
+                        for(var i = 0; i < this.numDisks; i++){
+                            storedAngles[i] = angle * i;
+                        }
+
+                        if(this.options.counterClockwise){
+                            storedAngles.reverse();
+                        }
+                        break;
+
+                    case 'radius':
+
+                        this.options.radius = pVal;
+                            break;
+
+                    case 'counterClockwise':
+
+                        this.options.counterClockwise = pVal;
+                        storedAngles.reverse();
+                        break;
+                }
+
+            };
 
             // Private members
             var getOppAdj = function(pAngle, pRadius){

@@ -42,9 +42,10 @@ define(
                 fftSize : 2048, // defaults to 2048
 
                 lineWidth : 1,
-                canvasFillStyle : 'rgba(0, 0, 0, 0.25)',
-                fillStyle : 'rgba(255, 255, 255, 1)',
-                strokeStyle : 'rgba(255, 255, 255, 1)'
+                canvasFillStyle : [ 0, 0, 0 ],
+                canvasFillAlpha :  0.25,
+                fillStyle: [255, 255, 255],
+                strokeStyle: [255, 255, 255]
 
             }
 
@@ -79,8 +80,8 @@ define(
                 this.canvCtx = canvas.getContext("2d");
 
                 this.canvCtx.lineWidth = this.options.lineWidth;
-                this.canvCtx.fillStyle = this.options.fillStyle;
-                this.canvCtx.strokeStyle = this.options.strokeStyle;
+                this.canvCtx.fillStyle = 'rgba(' + this.options.fillStyle[0] + ','  + this.options.fillStyle[1] + ',' + this.options.fillStyle[2] + ',' + 1 + ')';
+                this.canvCtx.strokeStyle = 'rgba(' + this.options.strokeStyle[0] + ','  + this.options.strokeStyle[1] + ',' + this.options.strokeStyle[2] + ',' + 1 + ')';
 
                 this.canvW = canvas.width;
                 this.canvH = canvas.height;
@@ -280,7 +281,8 @@ define(
             that.preLoopAction = function(){
 
                 // reset the canvas, with a reduced alpha to leave traces of the last draw
-                this.canvCtx.fillStyle = this.options.canvasFillStyle;
+                this.canvCtx.fillStyle = 'rgba(' + this.options.canvasFillStyle[0] + ','  + this.options.canvasFillStyle[1] + ',' + this.options.canvasFillStyle[2] + ',' + this.options.canvasFillAlpha + ')';
+
                 this.canvCtx.fillRect(0, 0, this.canvW, this.canvH);
             }
 
@@ -338,6 +340,40 @@ define(
                 return true;
 
             }
+
+            //------------------------------
+
+            that.optionChange = function(pOpt, pVal){
+
+                switch(pOpt){
+
+                    case 'inColor':
+
+                        this.options.inColor = pVal;
+                        break;
+
+                    case 'brightColors':
+
+                        this.options.brightColors = pVal;
+                        break;
+
+                    case 'canvasFillStyle':
+
+                        this.options.canvasFillStyle = [ Math.round(pVal[0]), Math.round(pVal[1]), Math.round(pVal[2]) ];
+                        break;
+
+                    case 'canvasFillAlpha':
+
+                        this.options.canvasFillAlpha =  pVal;
+                        break;
+
+                    case 'logAmpDivider':
+
+                        this.options.logAmpDivider = pVal;
+                        break;
+                }
+
+            };
 
             return that;
         }
