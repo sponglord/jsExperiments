@@ -2,10 +2,11 @@
 <meta charset="utf-8">
 <html>
 <head>
-   <title>local_audio_visualizer</title>
+    <title>local_audio_visualizer</title>
     <script type="text/javascript" data-main="../js/main.js" src="../js/lib/requireJS/require.2.3.2.min.js"></script>
-    <link type="text/css" rel="stylesheet" href="../css/style.css" />
-    <script type="text/javascript" >
+    <!--<script type="text/javascript" src="../js/lib/datgui/dat.gui.js"></script>-->
+    <link type="text/css" rel="stylesheet" href="../css/style.css"/>
+    <script type="text/javascript">
         (function(){
 
             /*global require */
@@ -15,71 +16,90 @@
                 var src = 'analyser/' + e.target.value;
 
                 require([src],
-                    function(Analyser){
+                        function(Analyser){
 
-                        var viz = new Analyser();
-                        viz.init();
+                            var vizTypes = document.getElementsByTagName('option');
+                            var vizType = vizTypes[e.target.selectedIndex].value;
 
-                        var options = document.getElementsByTagName('option');
-                        window.optionText = options[e.target.selectedIndex].innerHTML;
+                            var viz = new Analyser();
+                            viz.init(vizType);
 
-                        var instr = document.getElementById('instructions');
+                            window.viz = viz;
 
-                        var htmlStr = 'Drag an audio file to play it locally<br /> and visualise it with: <b><i>';
-                        htmlStr += optionText;
-                        htmlStr += '</i></b>';
-    //                    htmlStr += '<div class="br-input-holder">&nbsp;&nbsp;(bitrate?&nbsp;<input type="text" size="3" value="192" class="bit-rate-input" />)</div>'
-                        instr.innerHTML = htmlStr;
+                            // set up & intialise options gui
+                            window.drawOptions.setUp(vizType);
 
-                        var container = document.getElementById('canvas-container');
-                        container.classList.add('phaseTwo');
+                            var instr = document.getElementById('instructions');
 
-                        document.getElementById('canvas').style.display = 'block';
-                    }
+                            var htmlStr = 'Drag an audio file to play it locally<br /> and visualise it with: <b><i>';
+                            htmlStr += vizType;
+                            htmlStr += '</i></b>';
+                            //                    htmlStr += '<div class="br-input-holder">&nbsp;&nbsp;(bitrate?&nbsp;<input type="text" size="3" value="192" class="bit-rate-input" />)</div>'
+                            instr.innerHTML = htmlStr;
+
+                            var container = document.getElementById('canvas-container');
+                            container.classList.add('phaseTwo');
+
+                            document.getElementById('canvas').style.display = 'block';
+
+
+//                            document.getElementById('options').style.display = 'block';
+                        }
                 );
             };
 
-       })();
-   </script>
+        })();
+    </script>
 </head>
 <body>
-  <div id="container">
-    <div id="canvas-container">
-      <canvas width=1100 height=800 id="canvas"></canvas>
-      <!--<canvas width=3000 height=6000 id="dnaCanvas"></canvas>-->
-    </div>
-    <div id="instructions">
-      <div class="styled-select">
-          <select id="selector" onchange="vizChange(event);">
-              <option >Select a visualisation effect</option>
-              <option value="baseCode">Base require</option>
-              <option value="circles">Circles require</option>
-              <!--<option value="fatArcs">Fat arcs require</option>-->
-              <option value="bars">Bars require</option>
-              <option value="barLoop">BarLoop require</option>
-              <option value="star">Star require</option>
-              <option value="intersects">Intersects require</option>
-              <!--<option value="../js/analyser/localAudioVisualiser_circles.js">Circles</option>-->
-              <!--<option value="../js/analyser/localAudioVisualiser_fatArcs.js">FatArcs</option>-->
-              <option value="../js/analyser/localAudioVisualiser_superFatCircles_clean.js">SuperFatCircles</option>
-              <!--<option value="../js/analyser/localAudioVisualiser_intersects.js">Intersects</option>-->
-              <option value="../js/analyser/localAudioVisualiser_intersectsCircles.js">Intersects+Circles</option>
-              <option value="../js/analyser/localAudioVisualiser_intersectsCircles2.js">Intersects+Circles2(big intersects)</option>
-              <option value="../js/analyser/localAudioVisualiser_intersectsCirclesLines.js">Intersects+Circles+Lines</option>
-              <option value="../js/analyser/localAudioVisualiser_intersectsCirclesLines2.js">Intersects+Circles+Lines2 (dumb-bells)</option>
-              <!--<option value="../js/analyser/localAudioVisualiser_intersectsLines.js">Intersects+Lines</option>-->
-              <!--<option value="../js/analyser/localAudioVisualiser_intersectsLinesColor.js">Intersects+Lines_Colour</option>-->
-              <option value="../js/analyser/localAudioVisualiser_lines.js">Lines</option>
-              <option value="../js/analyser/localAudioVisualiser_linesFat.js">LinesFat</option>
-              <option value="../js/analyser/localAudioVisualiser_rings.js">Rings</option>
-              <option value="../js/analyser/localAudioVisualiser_timeDomain.js">Wave</option>
-          </select>
+    <div id="options" class="draw-options-holder"></div><!-- #options -->
+    <div id="container">
+
+
+        <div id="canvas-container">
+            <canvas width=1100 height=800 id="canvas"></canvas>
+            <!--<canvas width=3000 height=6000 id="dnaCanvas"></canvas>-->
         </div>
-    </div>
-  </div>
+        <div id="instructions">
+            <div class="styled-select">
+                <select id="selector" onchange="vizChange(event);">
+                    <option>Select a visualisation effect</option>
+                    <option value="baseCode">Base require</option>
+                    <option value="circles">Circles require</option>
+                    <!--<option value="fatArcs">Fat arcs require</option>-->
+                    <option value="bars">Bars require</option>
+                    <option value="barLoop">BarLoop require</option>
+                    <option value="star">Star require</option>
+                    <option value="intersects">Intersects require</option>
+                    <!--<option value="../js/analyser/localAudioVisualiser_circles.js">Circles</option>-->
+                    <!--<option value="../js/analyser/localAudioVisualiser_fatArcs.js">FatArcs</option>-->
+                    <option value="../js/analyser/localAudioVisualiser_superFatCircles_clean.js">SuperFatCircles</option>
+                    <!--<option value="../js/analyser/localAudioVisualiser_intersects.js">Intersects</option>-->
+                    <option value="../js/analyser/localAudioVisualiser_intersectsCircles.js">Intersects+Circles</option>
+                    <option value="../js/analyser/localAudioVisualiser_intersectsCircles2.js">Intersects+Circles2(big
+                        intersects)
+                    </option>
+                    <option value="../js/analyser/localAudioVisualiser_intersectsCirclesLines.js">Intersects+Circles+Lines
+                    </option>
+                    <option value="../js/analyser/localAudioVisualiser_intersectsCirclesLines2.js">Intersects+Circles+Lines2
+                        (dumb-bells)
+                    </option>
+                    <!--<option value="../js/analyser/localAudioVisualiser_intersectsLines.js">Intersects+Lines</option>-->
+                    <!--<option value="../js/analyser/localAudioVisualiser_intersectsLinesColor.js">Intersects+Lines_Colour</option>-->
+                    <option value="../js/analyser/localAudioVisualiser_lines.js">Lines</option>
+                    <option value="../js/analyser/localAudioVisualiser_linesFat.js">LinesFat</option>
+                    <option value="../js/analyser/localAudioVisualiser_rings.js">Rings</option>
+                    <option value="../js/analyser/localAudioVisualiser_timeDomain.js">Wave</option>
+                </select>
+            </div>
+        </div><!-- #instructions -->
+
+
+    </div><!-- #container -->
 </body>
-<script type="text/javascript" >
+<script type="text/javascript">
     (function(){
+
         document.getElementById('canvas').style.display = 'none';
     })();
 </script>
