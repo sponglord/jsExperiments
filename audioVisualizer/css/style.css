@@ -23,7 +23,7 @@ body{
 }
 
 #instructions {
-    position: relative;
+    /*position: relative;*/
     display: block;
     width: 100%;
     text-align: center;
@@ -85,3 +85,19 @@ body{
   -webkit-transform: scaleY(-1);
   margin-top: -6px;
 }
+
+
+.draw-options-holder{
+    /*margin-top: -200px;*/
+    position: absolute;
+    top: 0px;
+    display: none;
+}
+
+div.dg, .dg .c input[type=text]{
+    font-family: 'Open Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 300 !important;/* need to override dat.gui inline styling */
+    color: #ccc !important;
+}
+
