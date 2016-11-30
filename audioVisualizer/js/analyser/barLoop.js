@@ -15,29 +15,32 @@ define(
         function analyser(){
 
             var defaultOptions = {
+
+                // general
+                numFrequencies : 512,
                 batchModulo : 1,
-                samplesMultiplier : 0.75,
-                canvasFillStyle : [0,0,0],
+
+                ampMultiplier : 0.5,
+                boostAmp : false,
+                boostAmpDivider : 5,
+
+                mapFreqToColor : true,
+                brightColors : true,
+
+                lineWidth : 3,
                 canvasFillAlpha : 0.25, //.25 for others, 0.1 for 'lines'
+                strokeStyle: [255, 255, 255],
 
-                // DRAW OPTIONS
-                sizeMultiplier : 0.25,
-                logAmpDivider : 5,
+                linkAlphaToAmplitude : true,
+                invertAlpha : true,
 
-                numBars : 180, // number of 'ticks' around the circle
+                // specific
+                numElements : 180, // number of 'ticks' around the circle
                 radius : 200, // radius of the initial circle, the point on the circumference is the centre of the tick bar
                 counterClockwise : false, // which way round to draw the ticks - starting at 'midnight'
 
-                lineWidth : 3,
                 linkWidthToAmplitude : false,
-                maxLineWidth: 20,
-
-                strokeStyle: [255, 255, 255],
-                inColor : true,
-                brightColors : true,
-
-                linkAlphaToAmplitude : true,
-                invertAlpha : true
+                maxLineWidth: 20
 
             }
 
@@ -50,31 +53,31 @@ define(
 
             var __super = objectSuper(that);
 
-            that.init = function(){
+            that.init = function(pVizType){
 
-                __super.init();
+                __super.init(pVizType);
 
 //                for(var i = 0; i < 1; i+=0.1){
 //                    if(window.console && console.log){
 //                        console.log('### bars::init:: log ',i, '=',Math.log10(i));
 //                    }
 //                }
-//                for(var i = 0; i < 255; i++){
-//                    if(window.console && console.log){
-//                        console.log('### bars::init:: log ',i, '=',Math.log10(i));
-//                    }
-//                }
+                for(var i = 0; i < 256; i++){
+                    if(window.console && console.log){
+                        console.log('### bars::init:: log ',i, '=',Math.log10(i));
+                    }
+                }
             };
 
             that.setUp = function(pArrayBuffer){
 
                 __super.setUp(pArrayBuffer);
 
-                this.numDisks = this.binSize = this.options.numBars;
+                this.binSize = this.options.numElements;
 
-                var angle = (Math.PI * 2 ) / this.numDisks;
+                var angle = (Math.PI * 2 ) / this.binSize;
 
-                for(var i = 0; i < this.numDisks; i++){
+                for(var i = 0; i < this.binSize; i++){
                     storedAngles[i] = angle * i;
                 }
 
@@ -150,7 +153,7 @@ define(
                 var strokeStyle = this.options.strokeStyle
                 this.canvCtx.strokeStyle = 'rgba(' + strokeStyle[0] + ','  + strokeStyle[1] + ',' + strokeStyle[2] + ',' + alpha + ')';
 
-                if(this.options.inColor){
+                if(this.options.mapFreqToColor){
 
                     // normalise the frequency within the full frequency range (0 - 511)
                     var freqNorm = Utils.normalize(pFreqIndex, 0, pNumSamples - 1);
@@ -176,15 +179,29 @@ define(
                 }
 
 
-                // DRAW STAR(S)
+
+                // DRAW BARS
+                this.canvCtx.lineWidth = this.options.lineWidth;
+
                 if(this.options.linkWidthToAmplitude){
 
                     this.canvCtx.lineWidth = Math.floor(Utils.lerp(ampNorm, 0, this.options.maxLineWidth));
                 }
 
-                var log =  Math.log10(pAmplitude / this.options.logAmpDivider);// Use math.log to boost size - the larger the amplitude the bigger the boost
-                var multiplier = (log > 0 && log > this.options.sizeMultiplier)? log : this.options.sizeMultiplier
-//                multiplier = this.options.sizeMultiplier;
+                var multiplier = this.options.ampMultiplier;
+
+                // Use math.log to boost size - the larger the amplitude the bigger the boost
+                // Values
+                if(this.options.boostAmp){
+
+                    var log =  Math.log10(pAmplitude / this.options.boostAmpDivider);
+                    multiplier = (log > 0 && log > this.options.ampMultiplier)? log : this.options.ampMultiplier
+
+                    if(window.console && console.log){
+                        console.log('### barLoop::draw:: pAmplitude=',pAmplitude, 'this.options.ampMultiplier=',this.options.ampMultiplier, 'rawLog=', Math.log10(pAmplitude), 'log=',log);
+                    }
+                }
+
 
                 var barHeight = pAmplitude * multiplier;
 
@@ -295,21 +312,22 @@ define(
 
                 switch(pOpt){
 
-                    case 'numBars':
+                    case 'numElements':
 
-                        this.options.numBars = pVal;
+                        this.binSize = this.options.numElements = pVal;
 
-                        this.numDisks = this.binSize = this.options.numBars;
+                        var angle = (Math.PI * 2 ) / this.binSize;
 
-                        var angle = (Math.PI * 2 ) / this.numDisks;
+                        storedAngles = [];
 
-                        for(var i = 0; i < this.numDisks; i++){
+                        for(var i = 0; i < this.binSize; i++){
                             storedAngles[i] = angle * i;
                         }
 
                         if(this.options.counterClockwise){
                             storedAngles.reverse();
                         }
+
                         break;
 
                     case 'radius':
@@ -321,6 +339,7 @@ define(
 
                         this.options.counterClockwise = pVal;
                         storedAngles.reverse();
+
                         break;
                 }
 

@@ -3,7 +3,7 @@ define(
     [
         'utils/ObjectSuper',
         'analyser/baseCode',
-        'utils/utils2',
+        'utils/utils2'
     ],
     function(objectSuper,
              baseCode,
@@ -15,27 +15,30 @@ define(
         function analyser(){
 
             var defaultOptions = {
+
+                // general
+                numFrequencies : 512,
                 batchModulo : 1,
-                samplesMultiplier : 0.5,
-                canvasFillStyle : 'rgba(0, 0, 0, 0.25)', //.25 for others, 0.1 for 'lines'
-                diskWidth : 10, // 40 for others, 20 for 'lines'
+                canvasFillAlpha : 0.25, //.25 for others, 0.1 for 'lines'
 
                 // DRAW OPTIONS
+                spacing : 40, // 40 for others, 20 for 'lines'
                 sizeMultiplier : 1,
 
-                lineWidth : 1,
-                linkWidthToAmplitude : true,
-                maxLineWidth: 20,
+                logAmpDivider : 2,
 
-
-                strokeStyle: [255, 255, 255],
-                inColor : true,
+                mapFreqToColor : true,
                 brightColors : false,
+
+                lineWidth : 1,
+                strokeStyle: [255, 255, 255],
 
                 linkAlphaToAmplitude : true,
                 invertAlpha : true,
 
-                logAmpDivider : 2
+                // specific
+                linkWidthToAmplitude : true,
+                maxLineWidth: 20
             }
 
             var posX = null;
@@ -44,9 +47,9 @@ define(
 
             var __super = objectSuper(that);
 
-            that.init = function(){
+            that.init = function(pVizType){
 
-                __super.init();
+                __super.init(pVizType);
 
 
 //                for(var i = 1; i < 255; i++){
@@ -121,7 +124,7 @@ define(
                 var strokeStyle = this.options.strokeStyle
                 this.canvCtx.strokeStyle = 'rgba(' + strokeStyle[0] + ','  + strokeStyle[1] + ',' + strokeStyle[2] + ',' + alpha + ')';
 
-                if(this.options.inColor){
+                if(this.options.mapFreqToColor){
 
                     // normalise the frequency within the full frequency range (0 - 511)
                     var freqNorm = Utils.normalize(pFreqIndex, 0, pNumSamples - 1);
@@ -155,7 +158,9 @@ define(
 //                this.canvCtx.stroke();
 
 
+
                 // DRAW BARS
+                this.canvCtx.lineWidth = this.options.lineWidth;
                 if(this.options.linkWidthToAmplitude){
 
                     this.canvCtx.lineWidth = Math.floor(Utils.lerp(ampNorm, 0, this.options.maxLineWidth));
@@ -164,6 +169,8 @@ define(
 
                 var log =  Math.log10(pAmplitude / this.options.logAmpDivider);// Use math.log to boost size - the larger the amplitude the bigger the boost
                 var multiplier = (log > 0 && log > this.options.sizeMultiplier)? log : this.options.sizeMultiplier
+
+                multiplier = this.options.logAmpDivider;
 
                 var barHeight = pAmplitude * multiplier;
 
@@ -174,11 +181,24 @@ define(
                 this.canvCtx.stroke();
 
 
-                posX += this.options.diskWidth;
+                posX += this.options.spacing;
 
                 return true;
             }
 
+            that.optionChange = function(pOpt, pVal){
+
+                __super.optionChange(pOpt, pVal);
+
+                switch(pOpt){
+
+                    case 'numElements':
+
+                        this.binSize = this.options.numElements = pVal;
+
+                        break
+                }
+            };
 
             return that;
         }

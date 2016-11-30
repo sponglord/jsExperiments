@@ -3,7 +3,7 @@ define(
     [
         'utils/ObjectSuper',
         'analyser/baseCode',
-        'utils/utils2',
+        'utils/utils2'
     ],
     function(objectSuper,
              baseCode,
@@ -15,23 +15,24 @@ define(
         function analyser(){
 
             var defaultOptions = {
+
+                // general
+                numFrequencies : 512,
                 batchModulo : 1,
-                samplesMultiplier : 0.5,
 
-//                canvasFillStyle : 'rgba(0, 0, 0, 0.25)', // 0.1 good for original circles effect
+                logAmpDivider : 35, // lower = bigger circles
 
-                // DRAW OPTIONS
-                strokeStyle: [255, 255, 255],
-                inColor : true,
+                mapFreqToColor : true,
                 brightColors : false,
 
-                linkWidthToAmplitude : false,
-                maxLineWidth: 150,
+//                canvasFillAlpha : 0.1, // 0.1 good for original circles effect
 
                 linkAlphaToAmplitude : false,
-                invertAlpha : true,
+                invertAlpha : false,
 
-                logAmpDivider : 35 // lower = bigger circles
+                // specific
+                linkWidthToAmplitude : false,
+                maxLineWidth: 150
             }
 
             var posX = null;
@@ -40,9 +41,9 @@ define(
 
             var __super = objectSuper(that);
 
-            that.init = function(){
+            that.init = function(pVizType){
 
-                __super.init();
+                __super.init(pVizType);
             };
 
             /////////// OVERRIDEABLE FUNCTIONS FOR SUBCLASSES TO CHANGE CORE FUNCTIONALITY /////////////
@@ -110,7 +111,7 @@ define(
                 var strokeStyle = this.options.strokeStyle
                 this.canvCtx.strokeStyle = 'rgba(' + strokeStyle[0] + ','  + strokeStyle[1] + ',' + strokeStyle[2] + ',' + alpha + ')';
 
-                if(this.options.inColor){
+                if(this.options.mapFreqToColor){
 
                     // normalise the frequency within the full frequency range (0 - 511)
                     var freqNorm = Utils.normalize(pFreqIndex, 0, pNumSamples - 1);
@@ -150,7 +151,7 @@ define(
                 this.canvCtx.stroke();
 
 
-                posX += this.options.diskWidth;
+                posX += this.options.spacing;
 
                 return true;
             }

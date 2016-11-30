@@ -3,7 +3,7 @@ define(
     [
         'utils/ObjectSuper',
         'analyser/baseCode',
-        'utils/utils2',
+        'utils/utils2'
     ],
     function(objectSuper,
              baseCode,
@@ -15,31 +15,32 @@ define(
         function analyser(){
 
             var defaultOptions = {
+
+                // general
+                numFrequencies : 512,
                 batchModulo : 1,
-                samplesMultiplier : 0.5,
-                canvasFillStyle : 'rgba(0, 0, 0, 0.25)', //.25 for others, 0.1 for 'lines'
 
-                // DRAW OPTIONS
                 sizeMultiplier : 1,
+                logAmpDivider : 5,
 
-                numBars : 30,// number of 'arms the star has
+                mapFreqToColor : true,
+                brightColors : false,
 
                 lineWidth : 1,
-                linkWidthToAmplitude : true,
-                maxLineWidth: 20,
-
-                strokeStyle: [255, 255, 255],
-                inColor : true,
-                brightColors : false,
 
                 linkAlphaToAmplitude : true,
                 invertAlpha : true,
 
-                logAmpDivider : 5,
+                // specific
+
+                numElements : 30,// number of 'arms the star has
 
                 // if true renders one 'star' for every frequency, overlaying them to create a pulsing star effect
                 // else renders one 'star' with each arm representing one frequency
-                showStarForEachFreq : true
+                showStarForEachFreq : true,
+
+                linkWidthToAmplitude : true,
+                maxLineWidth: 20,
             }
 
             var posX = null;
@@ -51,9 +52,9 @@ define(
 
             var __super = objectSuper(that);
 
-            that.init = function(){
+            that.init = function(pVizType){
 
-                __super.init();
+                __super.init(pVizType);
 
 //                for(var i = 0; i < 1; i+=0.1){
 //                    if(window.console && console.log){
@@ -71,11 +72,11 @@ define(
 
                 __super.setUp(pArrayBuffer);
 
-                this.numDisks = this.binSize = this.options.numBars;
+                this.binSize = this.options.numElements;
 
-                var angle = (Math.PI * 2 ) / this.numDisks;
+                var angle = (Math.PI * 2 ) / this.binSize;
 
-                for(var i = 0; i < this.numDisks; i++){
+                for(var i = 0; i < this.binSize; i++){
                     storedAngles[i] = angle * i;
                 }
             };
@@ -113,7 +114,7 @@ define(
             that.draw = function(pFreqIndex, pAmplitude, pNumSamples, pBinNum){
 
 //              if(window.console && console.log){
-//                  console.log('### localAudioVisualiser_songDna_5_batch::draw:: pFreqIndex=',pFreqIndex,' pAmplitude=',pAmplitude, ' pNumSamples=',pNumSamples, 'i=',i);
+//                  console.log('### localAudioVisualiser_songDna_5_batch::draw:: pFreqIndex=',pFreqIndex,' pAmplitude=',pAmplitude, ' pNumSamples=',pNumSamples, 'pBinNum=',pBinNum);
 //              }
 
 
@@ -146,7 +147,7 @@ define(
                 var strokeStyle = this.options.strokeStyle
                 this.canvCtx.strokeStyle = 'rgba(' + strokeStyle[0] + ','  + strokeStyle[1] + ',' + strokeStyle[2] + ',' + alpha + ')';
 
-                if(this.options.inColor){
+                if(this.options.mapFreqToColor){
 
                     // normalise the frequency within the full frequency range (0 - 511)
                     var freqNorm = Utils.normalize(pFreqIndex, 0, pNumSamples - 1);
@@ -173,6 +174,7 @@ define(
 
 
                 // DRAW STAR(S)
+                this.canvCtx.lineWidth = this.options.lineWidth;
                 if(this.options.linkWidthToAmplitude){
 
                     this.canvCtx.lineWidth = Math.floor(Utils.lerp(ampNorm, 0, this.options.maxLineWidth));
@@ -186,7 +188,7 @@ define(
 
                 if(this.options.showStarForEachFreq){
 
-                    for(var i = 0; i < this.numDisks; i++){
+                    for(var i = 0; i < this.options.numElements; i++){
 
                         this.renderStar(barHeight, i);
                     }
@@ -253,6 +255,25 @@ define(
                 this.canvCtx.stroke();
             }
 
+            that.optionChange = function(pOpt, pVal){
+
+                __super.optionChange(pOpt, pVal);
+
+                switch(pOpt){
+
+                    case 'numElements':
+
+                        this.binSize = this.options.numElements = pVal;
+
+                        var angle = (Math.PI * 2 ) / this.binSize;
+
+                        for(var i = 0; i < this.binSize; i++){
+                            storedAngles[i] = angle * i;
+                        }
+
+                        break;
+                }
+            };
 
             return that;
         }

@@ -16,13 +16,14 @@ define(
 
             var defaultOptions = {
 
-                startPosX : 80,
-                diskWidth : 40,//  where our disks will start & how far apart our discs will be
-                sizeMultiplier : 0.5, // multiplier on the radius of our circles
+                minDecibels : -90,// defaults to -100
+                maxDecibels : -40,// defaults to -30
+                smoothingTimeConstant : 0.9,// defaults to 0.8
+                fftSize : 2048, // defaults to 2048
 
-                // Reduces the number of samples we process from frequencyBinCount to a proportion of that e.g. 1024 * .75 = 768
+                // The number of frequencies we examine from the frequencyBinCount range (=1024)
                 // (sometimes the lower part of the frequency range is of most interest)
-                samplesMultiplier : 1,
+                numFrequencies : 1024,
 
                 // Number of samples to collect before analyzing data (i.e. triggering the javaScriptNode.onaudioprocess event).
                 // Multiplying by one means we are receiving data to analyse 40-50 times a second, whilst multiplying by max value of 16 limits batches to 2-3 per second
@@ -36,16 +37,22 @@ define(
                 // Looking at the timestamps (in the draw cycle) the differences between them vary hugely when the sampleSize is larger (multiplied by more than 1); whereas keeping sampleSize small (1024)
                 // and using batchModulo to limit drawing cycles means the timestamps between 2 plays of the audio are close enough to one another to produce very similar (tho' not absolutely identical) results.
 
-                minDecibels : -90,// defaults to -100
-                maxDecibels : -40,// defaults to -30
-                smoothingTimeConstant : 0.9,// defaults to 0.8
-                fftSize : 2048, // defaults to 2048
+                numElements : 0,// number of elements will be decided by width/spacing & startPosX
+                startPosX : 80,
+                spacing : 40,//  where our disks will start & how far apart our discs will be
+                ampMultiplier : 0.5, // multiplier on the radius of our circles
+
+                mapFreqToColor : true,
+                brightColors : true,
 
                 lineWidth : 1,
                 canvasFillStyle : [ 0, 0, 0 ],
                 canvasFillAlpha :  0.25,
                 fillStyle: [255, 255, 255],
-                strokeStyle: [255, 255, 255]
+                strokeStyle: [255, 255, 255],
+
+                linkAlphaToAmplitude : false,
+                invertAlpha : false
 
             }
 
@@ -56,8 +63,12 @@ define(
             that.elapsedTime = 0;
             that.halfwayPointReached = false;
 
+            var __vizType;
 
-            that.init = function(){
+
+            that.init = function(pVizType){
+
+                __vizType = pVizType;
 
                 _.bindAll(this, 'setUp', 'processData');
 
@@ -89,9 +100,10 @@ define(
                 this.centerX = this.canvW / 2;
                 this.centerY = this.canvH / 2;
 
-                // We get the total number of bins/disks based on width / diskWidth figuring in the fact we start [x] px in
-                this.numDisks = Math.ceil((this.canvW - this.options.startPosX * 2) / this.options.diskWidth) + 1;
-                this.binSize = this.numDisks;
+                // If numElements not specified...
+                // ...we get the total number of elements based on width / spacing figuring in the fact we start [x] px in
+//                this.numDisks = Math.ceil((this.canvW - this.options.startPosX * 2) / this.options.spacing) + 1;
+                this.binSize = (this.options.numElements > 0)? this.options.numElements : Math.ceil((this.canvW - this.options.startPosX * 2) / this.options.spacing) + 1;
 
                 // Create a new 'audioContext'
                 this.audioCtx = new AudioContext();
@@ -173,11 +185,11 @@ define(
                 //-------------------------------------------------------------------------------
 
 
-                console.log('visualiser type=', window.optionText);
+                console.log('visualiser type=', __vizType);
                 console.log('audioCtx.sampleRate=', this.audioCtx.sampleRate);
                 console.log('analyserNode.fftSize=', this.analyserNode.fftSize);
                 console.log('analyserNode.frequencyBinCount=',this. analyserNode.frequencyBinCount);
-                console.log('numSamples=', this.analyserNode.frequencyBinCount * this.options.samplesMultiplier);
+                console.log('numFrequencies=', this.options.numFrequencies);
                 console.log('binSize=', this.binSize);
 
                 // Now connect the nodes together
@@ -208,7 +220,8 @@ define(
 
 
                 // NOTE: soundData.length always equals this.analyserNode.fftSize / 2
-                var numSamples = this.soundData.length * this.options.samplesMultiplier;
+//                var numSamples = this.soundData.length * this.options.samplesMultiplier;
+                var numSamples = this.options.numFrequencies;
 
 
                 //////////// DO SOMETHING BEFORE THE LOOP
@@ -320,7 +333,7 @@ define(
 //              }
                 //-------------------------------------------------------------------------------
 
-                // normalise the frequency within the full frequency range (0 - 1023)
+                // normalise the frequency within the full frequency range (0 - numFrequencies)
                 var freqNorm = Utils.normalize(pFreqIndex, 0, pNumSamples - 1);
 
                 // interpolate the normalised frequency to a valid hue value (0 - 360 degrees)
@@ -347,30 +360,20 @@ define(
 
                 switch(pOpt){
 
-                    case 'inColor':
-
-                        this.options.inColor = pVal;
-                        break;
-
-                    case 'brightColors':
-
-                        this.options.brightColors = pVal;
-                        break;
 
                     case 'canvasFillStyle':
+                    case 'fillStyle':
+                    case 'strokeStyle':
 
-                        this.options.canvasFillStyle = [ Math.round(pVal[0]), Math.round(pVal[1]), Math.round(pVal[2]) ];
+                        this.options[pOpt] = [ Math.round(pVal[0]), Math.round(pVal[1]), Math.round(pVal[2]) ];
                         break;
 
-                    case 'canvasFillAlpha':
 
-                        this.options.canvasFillAlpha =  pVal;
+                    default:
+
+                        this.options[pOpt] = pVal;
                         break;
 
-                    case 'logAmpDivider':
-
-                        this.options.logAmpDivider = pVal;
-                        break;
                 }
 
             };

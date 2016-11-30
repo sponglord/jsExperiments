@@ -3,7 +3,7 @@ define(
     [
         'utils/ObjectSuper',
         'analyser/baseCode',
-        'utils/utils2',
+        'utils/utils2'
     ],
     function(objectSuper,
              baseCode,
@@ -23,26 +23,31 @@ define(
 
             // Private vars
             var defaultOptions = {
-                batchModulo : 1,
-                samplesMultiplier : 0.5,
-                canvasFillStyle : 'rgba(0, 0, 0, 0.25)', //.25 for others, 0.1 for 'lines'
-                diskWidth : 40, // 40 for others, 20 for 'lines'
 
-                // DRAW OPTIONS
+                // general
+                numFrequencies : 512,
+                batchModulo : 1,
+
+                spacing : 40, // 40 for others, 20 for 'lines'
+
+                mapFreqToColor : true,
+
+                canvasFillAlpha : 0.25, //.25 for others, 0.1 for 'lines'
+                fillStyle: [255, 255, 255],
+                strokeStyle: [255, 255, 255],
+
+                linkAlphaToAmplitude : true,
+                invertAlpha : true,
+
+                // specific
                 drawCircles : true, // if false & drawLines is true makes the effect formerly known as: lines
                 intersectRadius : 10, // disregarded if drawCircles is false
                 doIntersectFill : true, // disregarded if drawCircles is false
                 doIntersectStroke : false, // disregarded if drawCircles is false
 
-                drawLines : true, // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & diskWidth:20)
+                drawLines : true, // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
                 clipLines : true, // true = draw from edges of intersect circles not from centers ('dumbbell' effect)
 
-                fillStyle: [255, 255, 255],
-                strokeStyle: [255, 255, 255],
-                inColor : true,
-
-                linkAlphaToAmplitude : true,
-                invertAlpha : true
             }
 
             var lastCircle = null;
@@ -53,9 +58,9 @@ define(
 
             var __super = objectSuper(that);
 
-            that.init = function(){
+            that.init = function(pVizType){
 
-                __super.init();
+                __super.init(pVizType);
             };
 
             /////////// OVERRIDEABLE FUNCTIONS FOR SUBCLASSES TO CHANGE CORE FUNCTIONALITY /////////////
@@ -128,7 +133,7 @@ define(
 
                 var rgb = strokeStyle;
 
-                if(this.options.inColor){
+                if(this.options.mapFreqToColor){
 
                     // normalise the frequency within the full frequency range (0 - 511)
                     var freqNorm = Utils.normalize(pFreqIndex, 0, pNumSamples - 1);
@@ -211,7 +216,7 @@ define(
 
                 lastCircle = [posX, this.canvH/2, pAmplitude * this.options.sizeMultiplier];
 
-                posX += this.options.diskWidth;
+                posX += this.options.spacing;
 
                 return true;
             }
