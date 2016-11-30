@@ -20,7 +20,9 @@ require(['analyser/drawOptions'],
         // dependencies are loaded and can be used here now.
 
         var opts = new DrawOptions();
-        opts.init();
+//        opts.init();
+
+        window.drawOptions = opts;
     });
 
 
