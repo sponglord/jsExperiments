@@ -40,10 +40,10 @@ define(
                 invertAlpha : true,
 
                 // specific
-                drawCircles : true, // if false & drawLines is true makes the effect formerly known as: lines
-                intersectRadius : 10, // disregarded if drawCircles is false
-                doIntersectFill : true, // disregarded if drawCircles is false
-                doIntersectStroke : false, // disregarded if drawCircles is false
+                drawIntersects : true, // if false & drawLines is true makes the effect formerly known as: lines
+                intersectRadius : 10, // disregarded if drawIntersects is false
+                doIntersectFill : true, // disregarded if drawIntersects is false
+                doIntersectStroke : false, // disregarded if drawIntersects is false
 
                 drawLines : true, // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
                 clipLines : true, // true = draw from edges of intersect circles not from centers ('dumbbell' effect)
@@ -170,7 +170,7 @@ define(
 
                     if(intersect){
 
-                        if(this.options.drawCircles){
+                        if(this.options.drawIntersects){
 
                             this.canvCtx.beginPath();
                             this.canvCtx.arc(intersect[0], intersect[1], this.options.intersectRadius, 0, Math.PI * 2, false);
@@ -191,7 +191,7 @@ define(
 
                         if(intersect.length > 2){
 
-                            if(this.options.drawCircles){
+                            if(this.options.drawIntersects){
 
                                 this.canvCtx.beginPath();
                                 this.canvCtx.arc(intersect[2], intersect[3], this.options.intersectRadius, 0, Math.PI * 2, false);

@@ -60,10 +60,10 @@ define(
             // else renders one 'star' with each arm representing one frequency
 
             // intersects
-            that.options.drawCircles = true;// if false & drawLines is true makes the effect formerly known as: lines
+            that.options.drawIntersects = true;// if false & drawLines is true makes the effect formerly known as: lines
             that.options.intersectRadius = 10; // disregarded if drawCircles is false
             that.options.doIntersectFill = true; // disregarded if drawCircles is false
-            that.options.doIntersectStroke = true; // disregarded if drawCircles is false
+            that.options.doIntersectStroke = false; // disregarded if drawCircles is false
             that.options.drawLines = true; // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
             that.options.clipLines = true;
 
@@ -82,23 +82,23 @@ define(
 
                 gen.add(options, 'numFrequencies', 256, 1024).step(256).onChange(function(value) {
 
-                    window.viz.optionChange('numFrequencies', value)
+                    window.viz.optionChange('numFrequencies', value);
                 });
 
                 gen.add(options, 'batchModulo', 1, 40).step(1).onChange(function(value) {
 
-                    window.viz.optionChange('batchModulo', value)
+                    window.viz.optionChange('batchModulo', value);
                 });
 
                 var maxXPos = $jq('#canvas').width();
                 gen.add(options, 'startPosX').max(maxXPos).onChange(function(value) {
 
-                    window.viz.optionChange('startPosX', value)
+                    window.viz.optionChange('startPosX', value);
                 });
 
                 gen.add(options, 'spacing').onChange(function(value) {
 
-                    window.viz.optionChange('spacing', value)
+                    window.viz.optionChange('spacing', value);
                 });
 
                 gen.add(options, 'mapFreqToColor').onChange(function(value) {
@@ -106,9 +106,15 @@ define(
                     showHideElement('brightColors', value);
 
                     // Only do if vizType = 'intersects'
-                    if(that.vizType === 'intersects' && that.options.doIntersectFill){
+                    if(that.vizType === 'intersects'){//} && that.options.doIntersectFill){
 
-                        showHideElement('fillStyle', !value);
+                        if(that.options.doIntersectFill){
+
+                            showHideElement('fillStyle', !value);
+                        }else{
+
+                            showHideElement('fillStyle', false);
+                        }
                     }
 
                     if(that.vizType !== 'intersects'){
@@ -120,21 +126,23 @@ define(
                         if(that.options.doIntersectStroke){
 
                             showHideElement('strokeStyle', !value);
+                        }else{
+                            showHideElement('strokeStyle', false);
                         }
                     }
 
-                    window.viz.optionChange('mapFreqToColor', value)
+                    window.viz.optionChange('mapFreqToColor', value);
                 });
 
                 gen.add(options, 'brightColors').onChange(function(value) {
 
-                    window.viz.optionChange('brightColors', value)
+                    window.viz.optionChange('brightColors', value);
                 });
 
                 gen.addColor(options, 'fillStyle').onChange(function(value) {
 
                     var roundVals = [ Math.round(value[0]), Math.round(value[1]), Math.round(value[2]) ];
-                    window.viz.optionChange('fillStyle', roundVals)
+                    window.viz.optionChange('fillStyle', roundVals);
                 });
 
                 gen.addColor(options, 'strokeStyle').onChange(function(value) {
@@ -147,23 +155,23 @@ define(
 
                     var roundVals = [ Math.round(value[0]), Math.round(value[1]), Math.round(value[2]) ];
 
-                    window.viz.optionChange('canvasFillStyle', roundVals)
+                    window.viz.optionChange('canvasFillStyle', roundVals);
                 });
 
                 gen.add(options, 'canvasFillAlpha', 0.05, 1).step(0.05).onChange(function(value) {
 
-                    window.viz.optionChange('canvasFillAlpha', value)
+                    window.viz.optionChange('canvasFillAlpha', value);
                 });
 
                 gen.add(options, 'lineWidth').min(0.1).onChange(function(value) {
 
-                    window.viz.optionChange('lineWidth', value)
+                    window.viz.optionChange('lineWidth', value);
                 });
 
                 gen.add(options, 'linkAlphaToAmplitude').onChange(function(value) {
 
                     showHideElement('invertAlpha', value);
-                    window.viz.optionChange('linkAlphaToAmplitude', value)
+                    window.viz.optionChange('linkAlphaToAmplitude', value);
                 });
 
                 gen.add(options, 'invertAlpha').onChange(function(value) {
@@ -197,17 +205,17 @@ define(
 
                     barLoop.add(options, 'numElements').onChange(function(value){
 
-                        window.viz.optionChange('numElements', value)
+                        window.viz.optionChange('numElements', value);
                     });
 
                     barLoop.add(options, 'radius').onChange(function(value){
 
-                        window.viz.optionChange('radius', value)
+                        window.viz.optionChange('radius', value);
                     });
 
                     barLoop.add(options, 'counterClockwise').onChange(function(value){
 
-                        window.viz.optionChange('counterClockwise', value)
+                        window.viz.optionChange('counterClockwise', value);
                     });
 
                     barLoop.add(options, 'linkWidthToAmplitude').onChange(function(value){
@@ -215,13 +223,13 @@ define(
                         showHideElement('lineWidth', !value);
                         showHideElement('maxLineWidth', value);
 
-                        window.viz.optionChange('linkWidthToAmplitude', value)
+                        window.viz.optionChange('linkWidthToAmplitude', value);
                     });
 
 
                     barLoop.add(options, 'maxLineWidth', 1, 100).step(1).onChange(function(value){
 
-                        window.viz.optionChange('maxLineWidth', value)
+                        window.viz.optionChange('maxLineWidth', value);
                     });
 
                     barLoop.open();
@@ -235,7 +243,7 @@ define(
 
                     bars.add(options, 'numElements').onChange(function(value){
 
-                        window.viz.optionChange('numElements', value)
+                        window.viz.optionChange('numElements', value);
                     });
 
                     bars.add(options, 'linkWidthToAmplitude').onChange(function(value){
@@ -243,12 +251,12 @@ define(
                         showHideElement('lineWidth', !value);
                         showHideElement('maxLineWidth', value);
 
-                        window.viz.optionChange('linkWidthToAmplitude', value)
+                        window.viz.optionChange('linkWidthToAmplitude', value);
                     });
 
                     bars.add(options, 'maxLineWidth', 1, 200).step(1).onChange(function(value){
 
-                        window.viz.optionChange('maxLineWidth', value)
+                        window.viz.optionChange('maxLineWidth', value);
                     });
 
                     bars.open()
@@ -261,12 +269,12 @@ define(
 
                     star.add(options, 'numElements').onChange(function(value){
 
-                        window.viz.optionChange('numElements', value)
+                        window.viz.optionChange('numElements', value);
                     });
 
                     star.add(options, 'showStarForEachFreq').onChange(function(value) {
 
-                        window.viz.optionChange('showStarForEachFreq', value)
+                        window.viz.optionChange('showStarForEachFreq', value);
                     });
 
                     star.add(options, 'linkWidthToAmplitude').onChange(function(value){
@@ -274,12 +282,12 @@ define(
                         showHideElement('lineWidth', !value);
                         showHideElement('maxLineWidth', value);
 
-                        window.viz.optionChange('linkWidthToAmplitude', value)
+                        window.viz.optionChange('linkWidthToAmplitude', value);
                     });
 
                     star.add(options, 'maxLineWidth', 1, 100).step(1).onChange(function(value){
 
-                        window.viz.optionChange('maxLineWidth', value)
+                        window.viz.optionChange('maxLineWidth', value);
                     });
 
                     star.open();
@@ -292,7 +300,7 @@ define(
 
                     circles.add(options, 'numElements').onChange(function(value){
 
-                        window.viz.optionChange('numElements', value)
+                        window.viz.optionChange('numElements', value);
                     });
 
                     circles.add(options, 'linkWidthToAmplitude').onChange(function(value){
@@ -300,12 +308,12 @@ define(
                         showHideElement('lineWidth', !value);
                         showHideElement('maxLineWidth', value);
 
-                        window.viz.optionChange('linkWidthToAmplitude', value)
+                        window.viz.optionChange('linkWidthToAmplitude', value);
                     });
 
                     circles.add(options, 'maxLineWidth', 1, 200).step(1).onChange(function(value){
 
-                        window.viz.optionChange('maxLineWidth', value)
+                        window.viz.optionChange('maxLineWidth', value);
                     });
 
 
@@ -317,15 +325,54 @@ define(
 
                     var intersects = gui.addFolder('Intersects');
 
-                    intersects.add(options, 'drawCircles').onChange(function(value){
+                    intersects.add(options, 'drawIntersects').onChange(function(value){
 
-                        window.viz.optionChange('drawCircles', value)
+                        window.viz.optionChange('drawIntersects', value);
+
+                        showHideElement('intersectRadius', value);
+                        showHideElement('doIntersectFill', value);
+                        showHideElement('doIntersectStroke', value);
                     });
 
-//                    drawCircles : true, // if false & drawLines is true makes the effect formerly known as: lines
-//                        intersectRadius : 10, // disregarded if drawCircles is false
-//                        doIntersectFill : true, // disregarded if drawCircles is false
-//                        doIntersectStroke : false, // disregarded if drawCircles is false
+                    intersects.add(options, 'intersectRadius').onChange(function(value){
+
+                        window.viz.optionChange('intersectRadius', value);
+                    });
+
+                    intersects.add(options, 'doIntersectFill').onChange(function(value){
+
+                        window.viz.optionChange('doIntersectFill', value);
+
+                        if(!that.options.mapFreqToColor){
+
+                            showHideElement('fillStyle', value);
+                        }
+                    });
+
+                    intersects.add(options, 'doIntersectStroke').onChange(function(value){
+
+                        window.viz.optionChange('doIntersectStroke', value);
+
+                        if(!that.options.mapFreqToColor){
+
+                            showHideElement('strokeStyle', value);
+                        }
+                    });
+
+                    intersects.add(options, 'drawLines').onChange(function(value){
+
+                        window.viz.optionChange('drawLines', value);
+                    });
+
+                    intersects.add(options, 'clipLines').onChange(function(value){
+
+                        window.viz.optionChange('clipLines', value);
+                    });
+
+//                        drawIntersects : true, // if false & drawLines is true makes the effect formerly known as: lines
+//                        intersectRadius : 10, // disregarded if drawIntersects is false
+//                        doIntersectFill : true, // disregarded if drawIntersects is false
+//                        doIntersectStroke : true, // disregarded if drawIntersects is false
 //
 //                        drawLines : true, // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
 //                        clipLines : true, // true = draw from edges of intersect circles not from centers ('dumbbell' effect)
