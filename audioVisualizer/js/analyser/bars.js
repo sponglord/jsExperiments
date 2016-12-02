@@ -23,9 +23,10 @@ define(
 
                 // DRAW OPTIONS
                 spacing : 40, // 40 for others, 20 for 'lines'
-                sizeMultiplier : 1,
 
-                logAmpDivider : 2,
+                ampMultiplier : 1,
+                boostAmp : false,
+                boostAmpDivider : 5,
 
                 mapFreqToColor : true,
                 brightColors : false,
@@ -167,10 +168,15 @@ define(
                 }
 
 
-                var log =  Math.log10(pAmplitude / this.options.logAmpDivider);// Use math.log to boost size - the larger the amplitude the bigger the boost
-                var multiplier = (log > 0 && log > this.options.sizeMultiplier)? log : this.options.sizeMultiplier
+                var multiplier = this.options.ampMultiplier;
 
-                multiplier = this.options.logAmpDivider;
+                // Use math.log to boost size - the larger the amplitude the bigger the boost
+                // Values 1 - 255 will give results 0 - 2.4065
+                if(this.options.boostAmp){
+
+                    var log =  Math.log10(pAmplitude / this.options.boostAmpDivider);
+                    multiplier = (log > 0 && log > this.options.ampMultiplier)? log : this.options.ampMultiplier
+                }
 
                 var barHeight = pAmplitude * multiplier;
 

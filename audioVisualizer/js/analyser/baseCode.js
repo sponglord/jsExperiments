@@ -361,12 +361,12 @@ define(
                 switch(pOpt){
 
 
-                    case 'canvasFillStyle':
-                    case 'fillStyle':
-                    case 'strokeStyle':
-
-                        this.options[pOpt] = [ Math.round(pVal[0]), Math.round(pVal[1]), Math.round(pVal[2]) ];
-                        break;
+//                    case 'canvasFillStyle':
+//                    case 'fillStyle':
+//                    case 'strokeStyle':
+//
+//                        this.options[pOpt] = [ Math.round(pVal[0]), Math.round(pVal[1]), Math.round(pVal[2]) ];
+//                        break;
 
 
                     default:

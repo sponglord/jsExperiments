@@ -20,19 +20,20 @@ define(
                 numFrequencies : 512,
                 batchModulo : 1,
 
-                logAmpDivider : 35, // lower = bigger circles
+                boostAmp : false,
+                boostAmpDivider : 35, // lower = bigger circles
 
                 mapFreqToColor : true,
                 brightColors : false,
 
-//                canvasFillAlpha : 0.1, // 0.1 good for original circles effect
+                canvasFillAlpha : 0.1, // 0.1 good for original circles effect
 
                 linkAlphaToAmplitude : false,
                 invertAlpha : false,
 
                 // specific
                 linkWidthToAmplitude : false,
-                maxLineWidth: 150
+                maxLineWidth: 20
             }
 
             var posX = null;
@@ -138,13 +139,22 @@ define(
 
 
                 // DRAW EACH DISK
+                this.canvCtx.lineWidth = this.options.lineWidth;
+
                 if(this.options.linkWidthToAmplitude){
 
                     this.canvCtx.lineWidth = Math.floor(Utils.lerp(ampNorm, 0, this.options.maxLineWidth));
                 }
 
-                var log =  Math.log10(pAmplitude / this.options.logAmpDivider);// Use math.log to boost size - the larger the amplitude the bigger the boost
-                var multiplier =  (log > 0 && log > this.options.sizeMultiplier)? log : this.options.sizeMultiplier
+                var multiplier = this.options.ampMultiplier;
+
+                // Use math.log to boost size - the larger the amplitude the bigger the boost
+                // Values 1 - 255 will give results 0 - 2.4065
+                if(this.options.boostAmp){
+
+                    var log =  Math.log10(pAmplitude / this.options.boostAmpDivider);
+                    multiplier = (log > 0 && log > this.options.ampMultiplier)? log : this.options.ampMultiplier
+                }
 
                 this.canvCtx.beginPath();
                 this.canvCtx.arc(posX, this.canvH / 2, pAmplitude * multiplier, 0, Math.PI * 2, false);
@@ -155,6 +165,20 @@ define(
 
                 return true;
             }
+
+            that.optionChange = function(pOpt, pVal){
+
+                __super.optionChange(pOpt, pVal);
+
+                switch(pOpt){
+
+                    case 'numElements':
+
+                        this.binSize = this.options.numElements = pVal;
+
+                        break
+                }
+            };
 
 //            that.init();
 

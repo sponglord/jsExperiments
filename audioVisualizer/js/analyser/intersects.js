@@ -156,7 +156,17 @@ define(
 
                 if(lastCircle){
 
-                    var intersect = Utils.circleIntersection(posX, this.canvH/2, pAmplitude * this.options.sizeMultiplier, lastCircle[0], lastCircle[1], lastCircle[2]);
+                    var multiplier = this.options.ampMultiplier;
+
+                    // Use math.log to boost size - the larger the amplitude the bigger the boost
+                    // Values 1 - 255 will give results 0 - 2.4065
+                    if(this.options.boostAmp){
+
+                        var log =  Math.log10(pAmplitude / this.options.boostAmpDivider);
+                        multiplier = (log > 0 && log > this.options.ampMultiplier)? log : this.options.ampMultiplier
+                    }
+
+                    var intersect = Utils.circleIntersection(posX, this.canvH/2, pAmplitude * this.options.ampMultiplier, lastCircle[0], lastCircle[1], lastCircle[2]);
 
                     if(intersect){
 
@@ -214,7 +224,7 @@ define(
                     }
                 }
 
-                lastCircle = [posX, this.canvH/2, pAmplitude * this.options.sizeMultiplier];
+                lastCircle = [posX, this.canvH/2, pAmplitude * this.options.ampMultiplier];
 
                 posX += this.options.spacing;
 

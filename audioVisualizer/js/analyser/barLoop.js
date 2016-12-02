@@ -62,11 +62,11 @@ define(
 //                        console.log('### bars::init:: log ',i, '=',Math.log10(i));
 //                    }
 //                }
-                for(var i = 0; i < 256; i++){
-                    if(window.console && console.log){
-                        console.log('### bars::init:: log ',i, '=',Math.log10(i));
-                    }
-                }
+//                for(var i = 0; i < 256; i++){
+//                    if(window.console && console.log){
+//                        console.log('### bars::init:: log ',i, '=',Math.log10(i));
+//                    }
+//                }
             };
 
             that.setUp = function(pArrayBuffer){
@@ -191,15 +191,15 @@ define(
                 var multiplier = this.options.ampMultiplier;
 
                 // Use math.log to boost size - the larger the amplitude the bigger the boost
-                // Values
+                // Values 1 - 255 will give results 0 - 2.4065
                 if(this.options.boostAmp){
 
                     var log =  Math.log10(pAmplitude / this.options.boostAmpDivider);
                     multiplier = (log > 0 && log > this.options.ampMultiplier)? log : this.options.ampMultiplier
 
-                    if(window.console && console.log){
-                        console.log('### barLoop::draw:: pAmplitude=',pAmplitude, 'this.options.ampMultiplier=',this.options.ampMultiplier, 'rawLog=', Math.log10(pAmplitude), 'log=',log);
-                    }
+//                    if(window.console && console.log){
+//                        console.log('### barLoop::draw:: pAmplitude=',pAmplitude, 'this.options.ampMultiplier=',this.options.ampMultiplier, 'rawLog=', Math.log10(pAmplitude), 'log=',log);
+//                    }
                 }
 
 

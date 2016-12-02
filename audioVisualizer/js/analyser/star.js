@@ -20,8 +20,9 @@ define(
                 numFrequencies : 512,
                 batchModulo : 1,
 
-                sizeMultiplier : 1,
-                logAmpDivider : 5,
+                ampMultiplier : 1,
+                boostAmp : false,
+                boostAmpDivider : 5,
 
                 mapFreqToColor : true,
                 brightColors : false,
@@ -180,8 +181,15 @@ define(
                     this.canvCtx.lineWidth = Math.floor(Utils.lerp(ampNorm, 0, this.options.maxLineWidth));
                 }
 
-                var log =  Math.log10(pAmplitude / this.options.logAmpDivider);// Use math.log to boost size - the larger the amplitude the bigger the boost
-                var multiplier = (log > 0 && log > this.options.sizeMultiplier)? log : this.options.sizeMultiplier
+                var multiplier = this.options.ampMultiplier;
+
+                // Use math.log to boost size - the larger the amplitude the bigger the boost
+                // Values 1 - 255 will give results 0 - 2.4065
+                if(this.options.boostAmp){
+
+                    var log =  Math.log10(pAmplitude / this.options.boostAmpDivider);
+                    multiplier = (log > 0 && log > this.options.ampMultiplier)? log : this.options.ampMultiplier
+                }
 
                 var barHeight = pAmplitude * multiplier;
 
