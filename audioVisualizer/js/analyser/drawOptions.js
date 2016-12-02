@@ -317,7 +317,10 @@ define(
 
                     var intersects = gui.addFolder('Intersects');
 
-                    showHideElement('brightColors', false);
+                    intersects.add(options, 'drawCircles').onChange(function(value){
+
+                        window.viz.optionChange('drawCircles', value)
+                    });
 
 //                    drawCircles : true, // if false & drawLines is true makes the effect formerly known as: lines
 //                        intersectRadius : 10, // disregarded if drawCircles is false
@@ -368,12 +371,6 @@ define(
                     __hideArray.push('lineWidth');
                 }
 
-                if(this.vizType === 'intersects'){
-
-                    this.options.linkAlphaToAmplitude = true;
-                    this.options.invertAlpha = true;
-                }
-
                 if(this.vizType === 'star'){
 
                     this.options.numElements = 30;
@@ -398,6 +395,14 @@ define(
                     this.options.invertAlpha = false;
                 }
 
+
+                if(this.vizType === 'intersects'){
+
+                    this.options.linkAlphaToAmplitude = true;
+                    this.options.invertAlpha = true;
+
+                    __hideArray.push('brightColors');
+                }
 
                 if(!that.options.boostAmp){
 
