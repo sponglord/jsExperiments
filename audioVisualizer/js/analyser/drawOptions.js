@@ -66,10 +66,16 @@ define(
             that.options.doIntersectStroke = false; // disregarded if drawCircles is false
             that.options.drawLines = true; // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
             that.options.clipLines = true;
+            that.options.drawLineStyle = [255, 255, 255];
 
 
             var __hideArray = [];
 
+            /**
+             * Create the dat.gui elements and set onChange behaviours
+             * Elements are organised by effect (vizType) - which also influences the behaviours and whether certain
+             * elements are visible as other elements change state
+             */
             that.init = function(){
 
                 var options = this.options;
@@ -103,29 +109,58 @@ define(
 
                 gen.add(options, 'mapFreqToColor').onChange(function(value) {
 
-                    showHideElement('brightColors', value);// TODO - not show if 'intersects'?
-
-                    // Only do if vizType = 'intersects'
+                    // ONLY DO IF vizType = 'intersects'
                     if(that.vizType === 'intersects'){
 
+                        // If we ARE filling the intersect circles then we should show the fillStyle option IF mapFreqToColor is set to false
+                        // And hide the fillStyle option IF mapFreqToColor is set to true
                         if(that.options.doIntersectFill){
 
-                            showHideElement('fillStyle', !value);
+                            showHideElement('fillStyle', !value); // OPP to this value
+
                         }else{
 
+                            // If we are NOT filling the intersect circles -  since intersects is currently the only effect that uses fillStyle
+                            // we should always hide the fillStyle option
                             showHideElement('fillStyle', false);
                         }
 
+                        // If we ARE stroking the intersect circles then we should show the strokeStyle option IF mapFreqToColor is set to false
+                        // And hide the strokeStyle option IF mapFreqToColor is set to true
                         if(that.options.doIntersectStroke){
 
-                            showHideElement('strokeStyle', !value);
+                            showHideElement('strokeStyle', !value); // OPP to this value
+
                         }else{
+
+                            // If we're in 'intersects' and NOT stroking the intersect circles then always hide the strokeStyle option
                             showHideElement('strokeStyle', false);
                         }
 
-                    }else{
+                        // If we ARE stroking the lines between intersect circles then we should show the drawLineStyle option IF mapFreqToColor is set to false
+                        // And hide the drawLineStyle option IF mapFreqToColor is set to true
+                        if(that.options.drawLines){
 
-                        showHideElement('strokeStyle', !value);
+                            showHideElement('drawLineStyle', !value); // OPP to this value
+
+                        }else{
+
+                            // If we're in 'intersects' and NOT stroking the lines between intersect circles then always hide the strokeStyle option
+                            showHideElement('drawLineStyle', false);
+                        }
+
+                        // Don't show brightColors option if effect is 'intersects'
+                        showHideElement('brightColors', false);
+
+                    }// ALL OTHER EFFECTS:
+                    else{
+
+                        // Show the strokeStyle option IF mapFreqToColor is set to false
+                        // And hide the strokeStyle option IF mapFreqToColor is set to true
+                        showHideElement('strokeStyle', !value); // OPP to this value
+
+                        // Show brightColors option
+                        showHideElement('brightColors', value);
                     }
 
                     window.viz.optionChange('mapFreqToColor', value);
@@ -138,20 +173,25 @@ define(
 
                 gen.addColor(options, 'fillStyle').onChange(function(value) {
 
+                    // Flaw in dat.gui means values can end up to ±10 decimal places
+                    // - which doesn't play well with setting the css rgba property... so first round the values
                     var roundVals = [ Math.round(value[0]), Math.round(value[1]), Math.round(value[2]) ];
                     window.viz.optionChange('fillStyle', roundVals);
                 });
 
                 gen.addColor(options, 'strokeStyle').onChange(function(value) {
 
+                    // Flaw in dat.gui means values can end up to ±10 decimal places
+                    // - which doesn't play well with setting the css rgba property... so first round the values
                     var roundVals = [ Math.round(value[0]), Math.round(value[1]), Math.round(value[2]) ];
                     window.viz.optionChange('strokeStyle', roundVals)
                 });
 
                 gen.addColor(options, 'canvasFillStyle').onChange(function(value) {
 
+                    // Flaw in dat.gui means values can end up to ±10 decimal places
+                    // - which doesn't play well with setting the css rgba property... so first round the values
                     var roundVals = [ Math.round(value[0]), Math.round(value[1]), Math.round(value[2]) ];
-
                     window.viz.optionChange('canvasFillStyle', roundVals);
                 });
 
@@ -217,7 +257,7 @@ define(
 
                     barLoop.add(options, 'linkWidthToAmplitude').onChange(function(value){
 
-                        showHideElement('lineWidth', !value);
+                        showHideElement('lineWidth', !value); // OPP to this value
                         showHideElement('maxLineWidth', value);
 
                         window.viz.optionChange('linkWidthToAmplitude', value);
@@ -245,7 +285,7 @@ define(
 
                     bars.add(options, 'linkWidthToAmplitude').onChange(function(value){
 
-                        showHideElement('lineWidth', !value);
+                        showHideElement('lineWidth', !value); // OPP to this value
                         showHideElement('maxLineWidth', value);
 
                         window.viz.optionChange('linkWidthToAmplitude', value);
@@ -276,7 +316,7 @@ define(
 
                     star.add(options, 'linkWidthToAmplitude').onChange(function(value){
 
-                        showHideElement('lineWidth', !value);
+                        showHideElement('lineWidth', !value); // OPP to this value
                         showHideElement('maxLineWidth', value);
 
                         window.viz.optionChange('linkWidthToAmplitude', value);
@@ -302,7 +342,7 @@ define(
 
                     circles.add(options, 'linkWidthToAmplitude').onChange(function(value){
 
-                        showHideElement('lineWidth', !value);
+                        showHideElement('lineWidth', !value); // OPP to this value
                         showHideElement('maxLineWidth', value);
 
                         window.viz.optionChange('linkWidthToAmplitude', value);
@@ -340,6 +380,7 @@ define(
 
                         window.viz.optionChange('doIntersectFill', value);
 
+                        // If we're NOT mapping frequency - show option to set circle fill colour
                         if(!that.options.mapFreqToColor){
 
                             showHideElement('fillStyle', value);
@@ -350,6 +391,7 @@ define(
 
                         window.viz.optionChange('doIntersectStroke', value);
 
+                        // If we're NOT mapping frequency - show option to set circle stroke colour
                         if(!that.options.mapFreqToColor){
 
                             showHideElement('strokeStyle', value);
@@ -359,6 +401,12 @@ define(
                     intersects.add(options, 'drawLines').onChange(function(value){
 
                         window.viz.optionChange('drawLines', value);
+
+                        // If we're NOT mapping frequency - show option to set line stroke colour
+                        if(!that.options.mapFreqToColor){
+
+                            showHideElement('drawLineStyle', value);
+                        }
                     });
 
                     intersects.add(options, 'clipLines').onChange(function(value){
@@ -366,13 +414,13 @@ define(
                         window.viz.optionChange('clipLines', value);
                     });
 
-//                        drawIntersects : true, // if false & drawLines is true makes the effect formerly known as: lines
-//                        intersectRadius : 10, // disregarded if drawIntersects is false
-//                        doIntersectFill : true, // disregarded if drawIntersects is false
-//                        doIntersectStroke : true, // disregarded if drawIntersects is false
-//
-//                        drawLines : true, // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
-//                        clipLines : true, // true = draw from edges of intersect circles not from centers ('dumbbell' effect)
+                    intersects.addColor(options, 'drawLineStyle').onChange(function(value) {
+
+                        // Flaw in dat.gui means values can end up to ±10 decimal places
+                        // - which doesn't play well with setting the css rgba property... so first round the values
+                        var roundVals = [ Math.round(value[0]), Math.round(value[1]), Math.round(value[2]) ];
+                        window.viz.optionChange('drawLineStyle', roundVals)
+                    });
 
                     intersects.open();
                 }
@@ -385,8 +433,13 @@ define(
                 }, 100);
             };
 
-            // Called from index.html once we know the visualisation type
-            // Set config vars based on the viz type and hide/show gui elements based on these values
+            /**
+             * @description Called from index.html once we know the visualisation type
+             *              Set config vars based on the viz type
+             *              Hide/show gui elements (base on vizType or initial config settings)
+             *
+             * @param pVizType
+             */
             that.setUp = function(pVizType){
 
                 this.vizType = pVizType.toLowerCase();
@@ -399,7 +452,6 @@ define(
 
                     __hideArray.push('spacing')
                     __hideArray.push('fillStyle')
-                    __hideArray.push('lineWidth');
                 }
 
                 if(this.vizType === 'bars'){
@@ -448,6 +500,7 @@ define(
                     this.options.invertAlpha = true;
 
                     __hideArray.push('brightColors');
+                    __hideArray.push('drawLineStyle');
                 }
 
                 if(!that.options.boostAmp){

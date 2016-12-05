@@ -51,6 +51,7 @@ define(
 
                 drawLines : true, // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
                 clipLines : true, // true = draw from edges of intersect circles not from centers ('dumbbell' effect)
+                drawLineStyle : [255, 255, 255]
 
             }
 
@@ -214,8 +215,15 @@ define(
 
                             if(this.options.drawLines){
 
-                                // Line sat & bright is linked to amplitude
-                                this.canvCtx.strokeStyle = 'rgba(' + rgb[0] + ','  + rgb[1] + ',' + rgb[2] + ',' + alpha + ')';;
+                                if(!this.options.mapFreqToColor){
+
+                                    this.canvCtx.strokeStyle = 'rgba(' + this.options.drawLineStyle[0] + ','  + this.options.drawLineStyle[1] + ',' + this.options.drawLineStyle[2] + ',' + alpha + ')';
+
+                                }else{
+
+                                    // Line sat & bright is linked to amplitude
+                                    this.canvCtx.strokeStyle = 'rgba(' + rgb[0] + ','  + rgb[1] + ',' + rgb[2] + ',' + alpha + ')';;
+                                }
 
                                 var lineLengthAdjust = (!this.options.clipLines)? 0 : this.options.intersectRadius;
 
