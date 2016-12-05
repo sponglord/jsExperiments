@@ -30,6 +30,10 @@ define(
 
                 spacing : 40, // 40 for others, 20 for 'lines'
 
+                ampMultiplier : 0.5,
+                boostAmp : false,
+                boostAmpDivider : 5,
+
                 mapFreqToColor : true,
 
                 canvasFillAlpha : 0.25, //.25 for others, 0.1 for 'lines'
@@ -41,7 +45,7 @@ define(
 
                 // specific
                 drawIntersects : true, // if false & drawLines is true makes the effect formerly known as: lines
-                intersectRadius : 10, // disregarded if drawIntersects is false
+                intersectRadius : 5, // disregarded if drawIntersects is false
                 doIntersectFill : true, // disregarded if drawIntersects is false
                 doIntersectStroke : false, // disregarded if drawIntersects is false
 
@@ -156,8 +160,11 @@ define(
 
                 if(lastCircle){
 
+                    this.canvCtx.lineWidth = this.options.lineWidth;
+
                     var multiplier = this.options.ampMultiplier;
 
+                    // TODO - do we want to do this for this effect - just changing the ampMultiplier makes it 'jittery' enough?
                     // Use math.log to boost size - the larger the amplitude the bigger the boost
                     // Values 1 - 255 will give results 0 - 2.4065
                     if(this.options.boostAmp){
@@ -166,7 +173,7 @@ define(
                         multiplier = (log > 0 && log > this.options.ampMultiplier)? log : this.options.ampMultiplier
                     }
 
-                    var intersect = Utils.circleIntersection(posX, this.canvH/2, pAmplitude * this.options.ampMultiplier, lastCircle[0], lastCircle[1], lastCircle[2]);
+                    var intersect = Utils.circleIntersection(posX, this.canvH/2, pAmplitude * multiplier, lastCircle[0], lastCircle[1], lastCircle[2]);
 
                     if(intersect){
 
@@ -224,7 +231,7 @@ define(
                     }
                 }
 
-                lastCircle = [posX, this.canvH/2, pAmplitude * this.options.ampMultiplier];
+                lastCircle = [posX, this.canvH/2, pAmplitude * multiplier];
 
                 posX += this.options.spacing;
 

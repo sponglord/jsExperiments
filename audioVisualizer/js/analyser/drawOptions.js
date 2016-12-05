@@ -61,7 +61,7 @@ define(
 
             // intersects
             that.options.drawIntersects = true;// if false & drawLines is true makes the effect formerly known as: lines
-            that.options.intersectRadius = 10; // disregarded if drawCircles is false
+            that.options.intersectRadius = 5; // disregarded if drawCircles is false
             that.options.doIntersectFill = true; // disregarded if drawCircles is false
             that.options.doIntersectStroke = false; // disregarded if drawCircles is false
             that.options.drawLines = true; // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
@@ -103,10 +103,10 @@ define(
 
                 gen.add(options, 'mapFreqToColor').onChange(function(value) {
 
-                    showHideElement('brightColors', value);
+                    showHideElement('brightColors', value);// TODO - not show if 'intersects'?
 
                     // Only do if vizType = 'intersects'
-                    if(that.vizType === 'intersects'){//} && that.options.doIntersectFill){
+                    if(that.vizType === 'intersects'){
 
                         if(that.options.doIntersectFill){
 
@@ -115,13 +115,6 @@ define(
 
                             showHideElement('fillStyle', false);
                         }
-                    }
-
-                    if(that.vizType !== 'intersects'){
-
-                        showHideElement('strokeStyle', !value);
-
-                    }else{
 
                         if(that.options.doIntersectStroke){
 
@@ -129,6 +122,10 @@ define(
                         }else{
                             showHideElement('strokeStyle', false);
                         }
+
+                    }else{
+
+                        showHideElement('strokeStyle', !value);
                     }
 
                     window.viz.optionChange('mapFreqToColor', value);
@@ -190,7 +187,7 @@ define(
                     showHideElement('boostAmpDivider', value);
                 });
 
-                gen.add(options, 'boostAmpDivider').onChange(function(value) {
+                gen.add(options, 'boostAmpDivider').min(0.1).onChange(function(value) {
 
                     window.viz.optionChange('boostAmpDivider', value);
                 });
@@ -334,7 +331,7 @@ define(
                         showHideElement('doIntersectStroke', value);
                     });
 
-                    intersects.add(options, 'intersectRadius').onChange(function(value){
+                    intersects.add(options, 'intersectRadius').min(1).onChange(function(value){
 
                         window.viz.optionChange('intersectRadius', value);
                     });
@@ -444,6 +441,8 @@ define(
 
 
                 if(this.vizType === 'intersects'){
+
+                    this.options.ampMultiplier = 0.5;
 
                     this.options.linkAlphaToAmplitude = true;
                     this.options.invertAlpha = true;
