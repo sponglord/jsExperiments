@@ -32,6 +32,7 @@ define(
                 invertAlpha : false,
 
                 // specific
+                numElements : 0,
                 linkWidthToAmplitude : false,
                 maxLineWidth: 20
             }

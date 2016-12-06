@@ -409,17 +409,17 @@ define(
                         }
                     });
 
-                    intersects.add(options, 'clipLines').onChange(function(value){
-
-                        window.viz.optionChange('clipLines', value);
-                    });
-
                     intersects.addColor(options, 'drawLineStyle').onChange(function(value) {
 
                         // Flaw in dat.gui means values can end up to ±10 decimal places
                         // - which doesn't play well with setting the css rgba property... so first round the values
                         var roundVals = [ Math.round(value[0]), Math.round(value[1]), Math.round(value[2]) ];
                         window.viz.optionChange('drawLineStyle', roundVals)
+                    });
+
+                    intersects.add(options, 'clipLines').onChange(function(value){
+
+                        window.viz.optionChange('clipLines', value);
                     });
 
                     intersects.open();
