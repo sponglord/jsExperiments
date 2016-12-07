@@ -108,7 +108,7 @@ define(
                 // normalise the amplitude within the possible range
                 var ampNorm = Utils.normalize(pAmplitude, 0, 255);
                 if(ampNorm === 0){
-                  return false
+                    return false
                 }
 
                 //-------------------------------------------------------------------------------
