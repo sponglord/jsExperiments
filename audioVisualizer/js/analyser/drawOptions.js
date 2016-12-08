@@ -45,7 +45,7 @@ define(
 
 
             // barLoop || star || bars
-            that.options.numElements = 180; // number of 'ticks' around the circle (barLoop) OR number of 'arms the star has
+            that.options.numElements = 160; // number of 'ticks' around the circle (barLoop) OR number of 'arms the star has
 
             // barLoop
             that.options.radius = 200;// radius of the initial circle, the point on the circumference is the centre of the tick bar
@@ -609,6 +609,7 @@ define(
 
                 if(this.vizType === 'barloop'){
 
+                    this.options.ampMultiplier = 0.5;
                     this.options.lineWidth = 3;
                     this.options.linkAlphaToAmplitude = true;
                     this.options.invertAlpha = true;

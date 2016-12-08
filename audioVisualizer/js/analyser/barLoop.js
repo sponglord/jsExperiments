@@ -16,7 +16,7 @@ define(
 
             var defaultOptions = {
 
-                // general
+                // GENERAL
                 numFrequencies : 512,
                 batchModulo : 1,
 
@@ -34,8 +34,16 @@ define(
                 linkAlphaToAmplitude : true,
                 invertAlpha : true,
 
-                // specific
-                numElements : 180, // number of 'ticks' around the circle
+                // SPECIFIC
+
+                // Number of 'ticks' around the circle
+                //
+                // NOTE: if this value doesn't 'play well' with the numFrequencies value then you may never
+                // see bars with colours representing the upper end  of the frequency range.
+                // Example: numFrequencies = 512, numElements = 180:
+                // When averaging frequencies across bins (default fny) then binSize = Math.floor(512 / 180) = 2
+                // 2 * 180 = 360 i.e we will only be visiting frequencies up to index 360 (even though we have 512 to inspect)
+                numElements : 160,
                 radius : 200, // radius of the initial circle, the point on the circumference is the centre of the tick bar
                 counterClockwise : false, // which way round to draw the ticks - starting at 'midnight'
 
@@ -120,7 +128,7 @@ define(
             that.draw = function(pFreqIndex, pAmplitude, pNumSamples, pBinNum){
 
 //              if(window.console && console.log){
-//                  console.log('### localAudioVisualiser_songDna_5_batch::draw:: pFreqIndex=',pFreqIndex,' pAmplitude=',pAmplitude, ' pNumSamples=',pNumSamples, 'i=',i);
+//                  console.log('### localAudioVisualiser_songDna_5_batch::draw:: pFreqIndex=',pFreqIndex,' pAmplitude=',pAmplitude, ' pNumSamples=',pNumSamples, 'pBinNum=',pBinNum);
 //              }
 
 
