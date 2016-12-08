@@ -1,3 +1,9 @@
+# intelliJ
 .idea
 *.iml
+
+# mac osX
 .DS_Store
+
+# my backup files
+*_BK.js
