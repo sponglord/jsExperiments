@@ -101,3 +101,29 @@ div.dg, .dg .c input[type=text]{
     color: #ccc !important;
 }
 
+.draw-options-holder .dg li.save-row{
+    background: #000;
+}
+
+.draw-options-holder .dg li.save-row .button{
+    text-shadow: none;
+    box-shadow: none;
+    background: #333;
+}
+
+.draw-options-holder .dg li.save-row .button.gears{
+    background-color: #666;
+}
+
+.draw-options-holder .dg li.save-row .button:hover{
+
+    box-shadow: none;
+    background-color: #666;
+}
+
+.draw-options-holder .dg li.save-row .button.gears:hover{
+
+    box-shadow: none;
+    background-color: #999;
+}
+

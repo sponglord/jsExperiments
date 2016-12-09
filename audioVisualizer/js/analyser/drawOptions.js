@@ -89,6 +89,8 @@ define(
                 var customContainer = document.getElementById('options');
                 customContainer.appendChild(gui.domElement);
 
+                gui.remember(options);
+
                 var gen = gui.addFolder('General');
 
                 gen.add(options, 'numFrequencies', 256, 1024).step(256).onChange(function(value) {
@@ -224,10 +226,13 @@ define(
                     window.viz.optionChange('invertAlpha', value);
                 });
 
-                gen.add(options, 'ampMultiplier').min(0.1).step(0.1).onChange(function(value) {
+                var ampMult = gen.add(options, 'ampMultiplier').min(0.1).step(0.1).onChange(function(value) {
 
                     window.viz.optionChange('ampMultiplier', value);
                 });
+                if(this.vizType === 'rings'){
+                    ampMult.max(10);
+                }
 
                 gen.add(options, 'boostAmp').onChange(function(value) {
 
@@ -580,7 +585,7 @@ define(
                         window.viz.optionChange('linkWidthToAmplitude', value);
                     });
 
-                    rings.add(options, 'maxLineWidth', 1, 50).step(1).onChange(function(value){
+                    rings.add(options, 'maxLineWidth', 1, 10).step(1).onChange(function(value){
 
                         window.viz.optionChange('maxLineWidth', value);
                     });
@@ -690,9 +695,11 @@ define(
                     this.options.linkWidthToAmplitude = true;
                     this.options.maxLineWidth = 10;
 
+
                     __hideArray.push('spacing');
                     __hideArray.push('startPosX');
                     __hideArray.push('lineWidth');
+                    __hideArray.push('boostAmp');
                 }
 
 

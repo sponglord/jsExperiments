@@ -156,13 +156,13 @@ define(
 
                 // Use math.log to boost size - the larger the amplitude the bigger the boost
                 // Values 1 - 255 will give results 0 - 2.4065
-                if(this.options.boostAmp){
-
-                    var log =  Math.log10(pAmplitude / this.options.boostAmpDivider);
-                    if(log > 1){
-                        stroke *= log;
-                    }
-                }
+//                if(this.options.boostAmp){
+//
+//                    var log =  Math.log10(pAmplitude / this.options.boostAmpDivider);
+//                    if(log > 1){
+//                        stroke *= log;
+//                    }
+//                }
 
                 this.canvCtx.lineWidth = stroke;
 
