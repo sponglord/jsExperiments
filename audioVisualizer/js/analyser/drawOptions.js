@@ -231,7 +231,10 @@ define(
                     window.viz.optionChange('ampMultiplier', value);
                 });
                 if(this.vizType === 'rings'){
-                    ampMult.max(10);
+                    ampMult.max(10).onChange(function(value) {// For some reason have to re-add the listener
+
+                        window.viz.optionChange('ampMultiplier', value);
+                    })
                 }
 
                 gen.add(options, 'boostAmp').onChange(function(value) {
