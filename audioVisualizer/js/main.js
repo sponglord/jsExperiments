@@ -11,7 +11,8 @@ require.config({
     paths: {
         lodash: 'lib/lodash/lodash.4.10.0',
         jquery: 'lib/jquery-3.1.1.min',
-        datgui : '../js/lib/datgui/dat.gui'
+        datgui : '../js/lib/datgui/dat.gui',
+        avBase : 'analyser/baseCode_mic'
     }
 });
 
@@ -64,8 +65,11 @@ require(['analyser/drawOptions'],
 
 })();
 
-(function(){
-    window.AudioContext = (function(){
-        return  window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
-    })();
+window.AudioContext = (function(){
+    return  window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
 })();
+
+
+window.navigator.getUserMedia = (function(){
+    return  navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+})()

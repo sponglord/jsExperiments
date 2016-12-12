@@ -2,7 +2,7 @@
 define(
     [
         'utils/ObjectSuper',
-        'analyser/baseCode',
+        'avBase',
         'utils/utils2'
     ],
     function(objectSuper,

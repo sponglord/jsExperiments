@@ -75,16 +75,57 @@ define(
                 // Gather and overwrite all options and defaults (from this class and any subclasses) into this.options
                 this.options = _.defaults(pOptions, defaultOptions);
 
-                // Set up drag &  drop
+                /////////////// DRAG 'N DROP //////////////////////
 //                var element = document.getElementById('container');
 //                AudioUtils.dropAndLoad(element, this.setUp, "ArrayBuffer");
+                //--------- end DRAG 'N DROP ----------------------
 
 
-                window.navigator.getUserMedia( {audio: true}, this.setUp, function(error){
+                /////////////// MICROPHONE //////////////////////
+                var constraints = {audio: true};
+
+                window.navigator.mediaDevices.enumerateDevices().then(function(devices) {
+
+                        var audioSource = null;
+
+                        devices.forEach(function(device) {
+
+                            if(device.kind === 'audioinput'){
+
+                                console.log('kind:', device.kind + " label: " + device.label +  " id = " + device.deviceId);
+
+                                // last audio source detected is set as the audio source
+                                audioSource = device.deviceId;
+                            }
+//                        kind: audioinput label: Default id = default
+//                        kind: audioinput label: Built-in Microphone id = 088d17f634d1b2b203a9ab19f0bb9a81804b03604934abeb942ea433c76b9a3f
+//                        kind: audioinput label: Display Audio id = aff4a4348dd651c4cd42e0e7f91718e1f78fa99e1bed59cce811e91eda20d389
+//                        kind: videoinput label:  id = 405cb69c9e54069b1fd58329ea3c1f75f282ad0e5070f548f34a66c6aa7a1143
+//                        kind: videoinput label:  id = 8778a875bbf8152aad31799df2185d9b1edbc95ac88dd7fa541a610e5ea9ecce
+//                        kind: audiooutput label: Default id = default
+//                        kind: audiooutput label: Built-in Output id = 69cc65bb9c0f1d4211260075bb26edc82160f996a92a3b0609d62358465f0935
+//                        kind: audiooutput label: Display Audio id = aff4a4348dd651c4cd42e0e7f91718e1f78fa99e1bed59cce811e91eda20d389
+                        });
+
+                        constraints = {
+                            audio: {
+                                optional: [{
+                                    sourceId: audioSource
+                                }]
+                            }
+                        };
+                    })
+                    .catch(function(err) {
+                        console.log(err.name + ": " + err.message);
+                    });
+
+
+                window.navigator.getUserMedia( constraints, this.setUp, function(error){
                     if(window.console && console.log){
                         console.log('### baseCode::getUserMedia:: error=',error);
                     }
                 });
+                //----------- end MICROPHONE -------------------
             };
 
             // Once the file is loaded, we start getting our hands dirty.
@@ -116,9 +157,64 @@ define(
                 this.audioCtx = new AudioContext();
 
 
+                /////////////// DRAG 'N DROP //////////////////////
                 // Set up the audio Analyser, the Source Buffer and javascriptNode
 //                this.setupAudioNodes();
-                this.setupLiveAudioNodes(pArrayBuffer)
+//                AudioUtils.decodeAndPlay(pArrayBuffer, this.audioCtx, this.sourceNode, this.javascriptNode);
+                //--------- end DRAG 'N DROP ----------------------
+
+
+                /////////////// MICROPHONE //////////////////////
+                this.setupAudioNodes(pArrayBuffer);
+
+                document.getElementById('instructions').innerHTML = '';
+                document.getElementById('instructions').style.display = 'none';
+                console.log('--------------- audio has started ----------------');
+
+                AudioUtils.addStopFunctionality(this.sourceNode, this.javascriptNode);
+
+                AudioUtils.audioPlaying = true;
+                //----------- end MICROPHONE -------------------
+            };
+
+            // Set up the audio Analyser, the Source Buffer and javascriptNode
+            that.setupAudioNodes = function(pArrayBuffer){
+
+                if(pArrayBuffer){
+
+                    /////////////// MICROPHONE //////////////////////
+
+                    // Create an AudioNode from the stream.
+                    this.sourceNode = this.audioCtx.createMediaStreamSource( pArrayBuffer );
+
+                }else{
+
+                    /////////////// DRAG 'N DROP //////////////////////
+
+                    // Store the audio clip in our context. This is our SourceNode and we create it with createBufferSource.
+                    this.sourceNode = this.audioCtx.createBufferSource();
+                }
+
+
+                // Creates an AnalyserNode, which can be used to expose audio time and frequency data
+                // It processes batches of audio samples from the Source Node
+                this.analyserNode = this.audioCtx.createAnalyser();
+
+                // this specifies the min & max values for the range of results when using getByteFrequencyData().
+                this.analyserNode.minDecibels = this.options.minDecibels;
+                this.analyserNode.maxDecibels = this.options.maxDecibels;
+
+                // The smoothingTimeConstant property's value defaults to 0.8; it must be in the range 0 to 1 (0 meaning no time averaging).
+                // If 0 is set, there is no averaging done, whereas a value of 1 means "overlap the previous and current buffer quite a lot while computing the value",
+                // which essentially smoothes the changes across AnalyserNode.getFloatFrequencyData/AnalyserNode.getByteFrequencyData calls.
+                // In technical terms, we apply a Blackman window and smooth the values over time. The default value is good enough for most cases.
+                this.analyserNode.smoothingTimeConstant = this.options.smoothingTimeConstant;
+
+                this.analyserNode.fftSize = this.options.fftSize;
+
+
+                // the javascriptNode aka scriptProcessor takes the output of the analyserNode and makes it available to our js code outside of the AudioContext
+                this.javascriptNode = this.audioCtx.createScriptProcessor(this.options.sampleSize, 1, 1);
 
                 // Setup the event handler that is called whenever the analyserNode node tells the javascriptNode that a new batch of samples have been processed
                 this.javascriptNode.onaudioprocess = function(){
@@ -154,91 +250,6 @@ define(
                         requestAnimationFrame(that.processData);
                     }
                 }
-
-//                AudioUtils.decodeAndPlay(pArrayBuffer, this.audioCtx, this.sourceNode, this.javascriptNode);
-            };
-
-            that.setupLiveAudioNodes = function(pArrayBuffer){
-
-                // Create an AudioNode from the stream.
-                this.sourceNode = this.audioCtx.createMediaStreamSource( pArrayBuffer );
-
-                // Creates an AnalyserNode, which can be used to expose audio time and frequency data
-                // It processes batches of audio samples from the Source Node
-                this.analyserNode = this.audioCtx.createAnalyser();
-
-                // this specifies the min & max values for the range of results when using getByteFrequencyData().
-                this.analyserNode.minDecibels = this.options.minDecibels;
-                this.analyserNode.maxDecibels = this.options.maxDecibels;
-
-                // The smoothingTimeConstant property's value defaults to 0.8; it must be in the range 0 to 1 (0 meaning no time averaging).
-                // If 0 is set, there is no averaging done, whereas a value of 1 means "overlap the previous and current buffer quite a lot while computing the value",
-                // which essentially smoothes the changes across AnalyserNode.getFloatFrequencyData/AnalyserNode.getByteFrequencyData calls.
-                // In technical terms, we apply a Blackman window and smooth the values over time. The default value is good enough for most cases.
-                this.analyserNode.smoothingTimeConstant = this.options.smoothingTimeConstant;
-
-                this.analyserNode.fftSize = this.options.fftSize;
-
-
-                // the javascriptNode aka scriptProcessor takes the output of the analyserNode and makes it available to our js code outside of the AudioContext
-                this.javascriptNode = this.audioCtx.createScriptProcessor(this.options.sampleSize, 1, 1);
-
-                ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
-                // Create the array for the data produed by the analysis
-                // frequencyBinCount is a value half that of the FFT size. This generally equates to the number of data values you will have to play with for the visualization.
-//                this.soundData = new Uint8Array(this.analyserNode.frequencyBinCount);
-//                this.soundData = new Float32Array(this.analyserNode.frequencyBinCount);
-
-                that.createFrequencyDataTypedArray();
-                //-------------------------------------------------------------------------------
-
-
-                console.log('visualiser type=', __vizType);
-                console.log('audioCtx.sampleRate=', this.audioCtx.sampleRate);
-                console.log('analyserNode.fftSize=', this.analyserNode.fftSize);
-                console.log('analyserNode.frequencyBinCount=',this. analyserNode.frequencyBinCount);
-                console.log('numFrequencies=', this.options.numFrequencies);
-                console.log('binSize=', this.binSize);
-
-                // Now connect the nodes together
-                this.sourceNode.connect(this.audioCtx.destination);// comment out to get the visualisation without the audio
-                this.sourceNode.connect(this.analyserNode);
-                this.analyserNode.connect(this.javascriptNode);
-                this.javascriptNode.connect(this.audioCtx.destination);
-
-                document.getElementById('instructions').innerHTML = '';
-                document.getElementById('instructions').style.display = 'none';
-                console.log('--------------- audio has started ----------------');
-
-                AudioUtils.audioPlaying = true;
-
-            };
-
-            // Set up the audio Analyser, the Source Buffer and javascriptNode
-            that.setupAudioNodes = function(){
-
-                // Store the audio clip in our context. This is our SourceNode and we create it with createBufferSource.
-                this.sourceNode = this.audioCtx.createBufferSource();
-
-                // Creates an AnalyserNode, which can be used to expose audio time and frequency data
-                // It processes batches of audio samples from the Source Node
-                this.analyserNode = this.audioCtx.createAnalyser();
-
-                // this specifies the min & max values for the range of results when using getByteFrequencyData().
-                this.analyserNode.minDecibels = this.options.minDecibels;
-                this.analyserNode.maxDecibels = this.options.maxDecibels;
-
-                // The smoothingTimeConstant property's value defaults to 0.8; it must be in the range 0 to 1 (0 meaning no time averaging).
-                // If 0 is set, there is no averaging done, whereas a value of 1 means "overlap the previous and current buffer quite a lot while computing the value",
-                // which essentially smoothes the changes across AnalyserNode.getFloatFrequencyData/AnalyserNode.getByteFrequencyData calls.
-                // In technical terms, we apply a Blackman window and smooth the values over time. The default value is good enough for most cases.
-                this.analyserNode.smoothingTimeConstant = this.options.smoothingTimeConstant;
-
-                this.analyserNode.fftSize = this.options.fftSize;
-
-
-                // the javascriptNode aka scriptProcessor takes the output of the analyserNode and makes it available to our js code outside of the AudioContext
-                this.javascriptNode = this.audioCtx.createScriptProcessor(this.options.sampleSize, 1, 1);
 
                 ////////////////// BYTES vs FLOATS //////////////////////////////////////////////
                 // Create the array for the data produed by the analysis
