@@ -76,7 +76,7 @@ define(
 
             that.init = function(pVizType){
 
-                __super.init(pVizType);
+                return __super.init(pVizType);
             };
 
             /////////// OVERRIDEABLE FUNCTIONS FOR SUBCLASSES TO CHANGE CORE FUNCTIONALITY /////////////

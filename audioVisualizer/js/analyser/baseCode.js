@@ -78,6 +78,8 @@ define(
                 // Set up drag &  drop
                 var element = document.getElementById('container');
                 AudioUtils.dropAndLoad(element, this.setUp, "ArrayBuffer");
+
+                return true;
             };
 
             // Once the file is loaded, we start getting our hands dirty.

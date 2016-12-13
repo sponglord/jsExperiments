@@ -21,28 +21,33 @@
                             var vizType = vizTypes[e.target.selectedIndex].value;
 
                             var viz = new Analyser();
-                            viz.init(vizType);
+                            var initSuccess = viz.init(vizType);
 
                             window.viz = viz;
 
-                            // set up & intialise options gui
-                            window.drawOptions.setUp(vizType);
+                            if(window.console && console.log){
+                                console.log('### index::init:: initSuccess=',initSuccess);
+                            }
 
-                            var instr = document.getElementById('instructions');
+                            if(initSuccess){
 
-                            var htmlStr = 'Drag an audio file to play it locally<br /> and visualise it with: <b><i>';
-                            htmlStr += vizType;
-                            htmlStr += '</i></b>';
-                            //                    htmlStr += '<div class="br-input-holder">&nbsp;&nbsp;(bitrate?&nbsp;<input type="text" size="3" value="192" class="bit-rate-input" />)</div>'
-                            instr.innerHTML = htmlStr;
+                                // set up & intialise options gui
+                                window.drawOptions.setUp(vizType);
 
-                            var container = document.getElementById('canvas-container');
-                            container.classList.add('phaseTwo');
+                                var instr = document.getElementById('instructions');
 
-                            document.getElementById('canvas').style.display = 'block';
+                                var htmlStr = 'Drag an audio file to play it locally<br /> and visualise it with: <b><i>';
+                                htmlStr += vizType;
+                                htmlStr += '</i></b>';
+                                //                    htmlStr += '<div class="br-input-holder">&nbsp;&nbsp;(bitrate?&nbsp;<input type="text" size="3" value="192" class="bit-rate-input" />)</div>'
+                                instr.innerHTML = htmlStr;
 
+                                var container = document.getElementById('canvas-container');
+                                container.classList.add('phaseTwo');
 
-//                            document.getElementById('options').style.display = 'block';
+                                document.getElementById('canvas').style.display = 'block';
+                            }
+
                         }
                 );
             };

@@ -63,7 +63,7 @@ define(
 
             that.init = function(pVizType){
 
-                __super.init(pVizType);
+                return __super.init(pVizType);
 
 //                for(var i = 0; i < 1; i+=0.1){
 //                    if(window.console && console.log){

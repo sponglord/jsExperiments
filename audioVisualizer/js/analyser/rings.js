@@ -47,12 +47,12 @@ define(
 
             that.init = function(pVizType){
 
-                __super.init(pVizType);
-
                 var canvas = document.getElementById('canvas');
                 // higher heights have a negative impact on performance e.g. a height of 800px means a CPU usage of 70%+
                 // 500px means a CPU usage of around 50%
                 canvas.height = 500;
+
+               return  __super.init(pVizType);
             };
 
             /////////// OVERRIDEABLE FUNCTIONS FOR SUBCLASSES TO CHANGE CORE FUNCTIONALITY /////////////

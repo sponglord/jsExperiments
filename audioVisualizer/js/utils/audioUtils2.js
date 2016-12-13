@@ -102,6 +102,65 @@ define( ['utils/utils2'],
                 );
             },
 
+            setUpAudioInput : function(pCallback){
+
+                var constraints = {audio : true};
+
+                if(typeof window.navigator.mediaDevices === 'undefined' ||
+                    typeof window.navigator.mediaDevices.enumerateDevices === 'undefined'){
+                    alert('This browser does not support navigator.mediaDevices.\n\nTry Chrome or Firefox.');
+                }else{
+
+                    window.navigator.mediaDevices.enumerateDevices().then(function(devices){
+
+                            var audioSource = null;
+
+                            devices.forEach(function(device){
+
+                                if(device.kind === 'audioinput'){
+
+                                    console.log('kind:', device.kind + " label: " + device.label + " id = " + device.deviceId);
+
+                                    // last audio source detected is set as the audio source
+                                    audioSource = device.deviceId;
+                                }
+                                //                        kind: audioinput label: Default id = default
+                                //                        kind: audioinput label: Built-in Microphone id = 088d17f634d1b2b203a9ab19f0bb9a81804b03604934abeb942ea433c76b9a3f
+                                //                        kind: audioinput label: Display Audio id = aff4a4348dd651c4cd42e0e7f91718e1f78fa99e1bed59cce811e91eda20d389
+                                //                        kind: videoinput label:  id = 405cb69c9e54069b1fd58329ea3c1f75f282ad0e5070f548f34a66c6aa7a1143
+                                //                        kind: videoinput label:  id = 8778a875bbf8152aad31799df2185d9b1edbc95ac88dd7fa541a610e5ea9ecce
+                                //                        kind: audiooutput label: Default id = default
+                                //                        kind: audiooutput label: Built-in Output id = 69cc65bb9c0f1d4211260075bb26edc82160f996a92a3b0609d62358465f0935
+                                //                        kind: audiooutput label: Display Audio id = aff4a4348dd651c4cd42e0e7f91718e1f78fa99e1bed59cce811e91eda20d389
+                            });
+
+                            constraints = {
+                                audio : {
+                                    optional : [{
+                                        sourceId : audioSource
+                                    }]
+                                }
+                            };
+                        })
+                        .catch(function(err){
+                            console.log(err.name + ": " + err.message);
+                        });
+                }
+
+                if(typeof window.navigator.getUserMedia !== 'undefined'){
+
+                    window.navigator.getUserMedia(constraints, pCallback, function(error){
+                        if(window.console && console.log){
+                            console.log('### baseCode::getUserMedia:: error=', error);
+                        }
+                    });
+
+                    return true;
+
+                }
+
+                return false;
+            },
 
             // re. http://stackoverflow.com/questions/4364823/how-do-i-obtain-the-frequencies-of-each-value-in-an-fft
             getFrequencyFromIndex : function(pIndex, pAudioCtx, pAnalyserNode){
