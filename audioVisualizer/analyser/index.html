@@ -23,6 +23,13 @@
                             var viz = new Analyser();
                             var initSuccess = viz.init(vizType);
 
+                            var vizOptions = viz.options;
+
+                            if(window.console && console.log){
+                                console.log('### index::vizOptions:: ',vizOptions);
+                                console.log('### index::guiDefaultOptions:: ',guiDefaultOptions.remembered["Default"]["0"]);
+                            }
+
                             window.viz = viz;
 
                             if(window.console && console.log){
@@ -32,7 +39,7 @@
                             if(initSuccess){
 
                                 // set up & intialise options gui
-                                window.drawOptions.setUp(vizType);
+                                window.drawOptions.setUp(vizType, vizOptions);
 
                                 var instr = document.getElementById('instructions');
 
