@@ -2,77 +2,22 @@
 define(
     [
         'datgui',
-        'jquery'
-//        'utils/utils2'
+        'jquery',
+        'lodash'
     ],
     function(
         dat,
-        $jq
-//        Utils
+        $jq,
+        _
     ){
 
         "use strict";
 
         function options(){
 
-
             var that = {};
 
             that.options = {};
-
-            // general
-            that.options.numFrequencies = 512;
-            that.options.batchModulo = 1;
-
-            that.options.startPosX = 80;
-            that.options.spacing = 40;
-
-            that.options.ampMultiplier = 1;
-            that.options.boostAmp = false;
-            that.options.boostAmpDivider = 5;
-
-            that.options.mapFreqToColor = true;
-            that.options.brightColors = true;
-
-            that.options.lineWidth = 1;
-            that.options.canvasFillStyle = [ 0, 0, 0];
-            that.options.canvasFillAlpha = 0.25;
-            that.options.fillStyle = [ 255, 255, 255];
-            that.options.strokeStyle = [ 255, 255, 255];
-
-            that.options.linkAlphaToAmplitude = false;
-            that.options.invertAlpha = false;
-
-
-            // barLoop || star || bars
-            that.options.numElements = 160; // number of 'ticks' around the circle (barLoop) OR number of 'arms the star has
-
-            // barLoop
-            that.options.radius = 200;// radius of the initial circle, the point on the circumference is the centre of the tick bar
-            that.options.counterClockwise = false;// which way round to draw the ticks - starting at 'midnight'
-
-            // barLoop || bars || star || circles
-            that.options.linkWidthToAmplitude = false;
-            that.options.maxLineWidth = 20;
-
-            // star
-            that.options.showStarForEachFreq = true;// if true renders one 'star' for every frequency, overlaying them to create a pulsing star effect
-            // else renders one 'star' with each arm representing one frequency
-
-            // intersects
-            that.options.drawIntersects = true;// if false & drawLines is true makes the effect formerly known as: lines
-            that.options.intersectRadius = 2; // disregarded if drawCircles is false
-            that.options.doIntersectFill = true; // disregarded if drawCircles is false
-            that.options.doIntersectStroke = false; // disregarded if drawCircles is false
-            that.options.drawLines = true; // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
-            that.options.drawLineStyle = [255, 255, 255];
-            that.options.intersectLineWidth = 1;
-            that.options.clipLines = true;
-
-
-            that.options.renderCircles = true;
-            that.options.renderIntersects = true;
-
 
             var __hideArray = [];
 
@@ -89,6 +34,7 @@ define(
                 var customContainer = document.getElementById('options');
                 customContainer.appendChild(gui.domElement);
 
+                // adds save options at top of gui panel
                 gui.remember(options);
 
                 var gen = gui.addFolder('General');
@@ -487,21 +433,18 @@ define(
 
             /**
              * @description Called from index.html once we know the visualisation type
-             *              Set config vars based on the viz type
-             *              Hide/show gui elements (base on vizType or initial config settings)
+             *              Hide/show gui elements based on vizType
              *
              * @param pVizType
+             * @param pVizOptions - options values from instantiated visualization
              */
             that.setUp = function(pVizType, pVizOptions){
+
+                this.options = pVizOptions;
 
                 this.vizType = pVizType.toLowerCase();
 
                 if(this.vizType === 'barloop'){
-
-                    this.options.ampMultiplier = 0.5;
-                    this.options.lineWidth = 3;
-                    this.options.linkAlphaToAmplitude = true;
-                    this.options.invertAlpha = true;
 
                     __hideArray.push('spacing')
                     __hideArray.push('fillStyle')
@@ -509,27 +452,11 @@ define(
 
                 if(this.vizType === 'bars'){
 
-                    this.options.numElements = 0;// will decide number based on width/spacing
-
-                    this.options.brightColors = false;
-
-                    this.options.linkAlphaToAmplitude = true;
-                    this.options.invertAlpha = true;
-
-                    this.options.linkWidthToAmplitude = true;
-
                     __hideArray.push('fillStyle')
                     __hideArray.push('lineWidth');
                 }
 
                 if(this.vizType === 'star'){
-
-                    this.options.numElements = 30;
-
-                    this.options.linkAlphaToAmplitude = true;
-                    this.options.invertAlpha = true;
-
-                    this.options.linkWidthToAmplitude = true;
 
                     __hideArray.push('spacing')
                     __hideArray.push('fillStyle')
@@ -538,13 +465,6 @@ define(
 
                 if(this.vizType === 'circlesandintersects'){
 
-                    this.options.numElements = 0;// will decide number based on width/spacing
-                    this.options.canvasFillAlpha = 0.1;
-                    this.options.ampMultiplier = 0.5;
-                    this.options.boostAmpDivider = 35;
-                    this.options.linkAlphaToAmplitude = false;
-                    this.options.invertAlpha = false;
-
                     __hideArray.push('brightColors');
                     __hideArray.push('drawLineStyle');
                     __hideArray.push('maxLineWidth');
@@ -552,13 +472,6 @@ define(
 
 
                 if(this.vizType === 'rings'){
-
-                    this.options.boostAmpDivider = 5;
-                    this.options.canvasFillAlpha = 0.3;
-                    this.options.brightColors = false;
-                    this.options.linkWidthToAmplitude = true;
-                    this.options.maxLineWidth = 10;
-
 
                     __hideArray.push('spacing');
                     __hideArray.push('startPosX');

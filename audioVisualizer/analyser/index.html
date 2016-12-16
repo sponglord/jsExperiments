@@ -15,49 +15,44 @@
                 var src = 'analyser/' + e.target.value;
 
                 require([src],
-                        function(Analyser){
+                    function(Analyser){
 
-                            var vizTypes = document.getElementsByTagName('option');
-                            var vizType = vizTypes[e.target.selectedIndex].value;
+                        var vizTypes = document.getElementsByTagName('option');
+                        var vizType = vizTypes[e.target.selectedIndex].value;
 
-                            var viz = new Analyser();
-                            var initSuccess = viz.init(vizType);
+                        var viz = new Analyser();
+                        var initSuccess = viz.init(vizType);
 
-                            var vizOptions = viz.options;
+                        var vizOptions = viz.options;
 
-                            if(window.console && console.log){
-                                console.log('### index::vizOptions:: ',vizOptions);
-                                console.log('### index::guiDefaultOptions:: ',guiDefaultOptions.remembered["Default"]["0"]);
-                            }
+                        window.viz = viz;
 
-                            window.viz = viz;
-
-                            if(window.console && console.log){
-                                console.log('### index::init:: initSuccess=',initSuccess);
-                            }
-
-                            if(initSuccess){
-
-                                // set up & intialise options gui
-                                window.drawOptions.setUp(vizType, vizOptions);
-
-                                var instr = document.getElementById('instructions');
-
-                                var htmlStr = 'Drag an audio file to play it locally<br /> and visualise it with: <b><i>';
-                                htmlStr += vizType;
-                                htmlStr += '</i></b>';
-                                //                    htmlStr += '<div class="br-input-holder">&nbsp;&nbsp;(bitrate?&nbsp;<input type="text" size="3" value="192" class="bit-rate-input" />)</div>'
-                                instr.innerHTML = htmlStr;
-
-                                var container = document.getElementById('canvas-container');
-                                container.classList.add('phaseTwo');
-
-                                document.getElementById('canvas').style.display = 'block';
-                            }
-
+                        if(window.console && console.log){
+                            console.log('### index::init:: initSuccess=',initSuccess);
                         }
-                );
-            };
+
+                        if(initSuccess){
+
+                            // set up & intialise options gui
+                            window.drawOptions.setUp(vizType, vizOptions);
+
+                            var instr = document.getElementById('instructions');
+
+                            var htmlStr = 'Drag an audio file to play it locally<br /> and visualise it with: <b><i>';
+                            htmlStr += vizType;
+                            htmlStr += '</i></b>';
+                            //                    htmlStr += '<div class="br-input-holder">&nbsp;&nbsp;(bitrate?&nbsp;<input type="text" size="3" value="192" class="bit-rate-input" />)</div>'
+                            instr.innerHTML = htmlStr;
+
+                            var container = document.getElementById('canvas-container');
+                            container.classList.add('phaseTwo');
+
+                            document.getElementById('canvas').style.display = 'block';
+                        }
+
+                    }
+                );//require
+            };//vizChange
 
         })();
     </script>
@@ -65,7 +60,6 @@
 <body>
     <div id="options" class="draw-options-holder"></div><!-- #options -->
     <div id="container">
-
 
         <div id="canvas-container">
             <canvas width=1100 height=800 id="canvas"></canvas>

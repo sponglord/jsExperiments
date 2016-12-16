@@ -40,8 +40,8 @@ define(
                 fillStyle: [255, 255, 255],
                 strokeStyle: [255, 255, 255],
 
-                linkAlphaToAmplitude : true,
-                invertAlpha : true,
+                linkAlphaToAmplitude : false,
+                invertAlpha : false,
 
 
                 // SPECIFIC

@@ -16,6 +16,7 @@ define(
 
             var defaultOptions = {
 
+                //////////////// GENERAL ///////////////////////
                 minDecibels : -90,// defaults to -100
                 maxDecibels : -40,// defaults to -30
                 smoothingTimeConstant : 0.9,// defaults to 0.8
@@ -40,7 +41,10 @@ define(
                 numElements : 0,// number of elements will be decided by width/spacing & startPosX
                 startPosX : 80,
                 spacing : 40,//  where our disks will start & how far apart our discs will be
+
                 ampMultiplier : 0.5, // multiplier on the radius of our circles
+                boostAmp : false,
+                boostAmpDivider : 5,
 
                 mapFreqToColor : true,
                 brightColors : true,
@@ -53,7 +57,6 @@ define(
 
                 linkAlphaToAmplitude : false,
                 invertAlpha : false
-
             }
 
             var that = {};

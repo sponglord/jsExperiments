@@ -127,3 +127,13 @@ div.dg, .dg .c input[type=text]{
     background-color: #999;
 }
 
+.dg select{
+    background-color: #333;
+    color: #ccc;
+    border: none;
+}
+
+.dg select:focus{
+    outline: none;
+}
+
