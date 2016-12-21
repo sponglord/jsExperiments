@@ -40,7 +40,10 @@ define(
                 numElements : 0,// number of elements will be decided by width/spacing & startPosX
                 startPosX : 80,
                 spacing : 40,//  where our disks will start & how far apart our discs will be
-                ampMultiplier : 0.5, // multiplier on the radius of our circles
+
+                ampMultiplier : 0.5, // multiplier on the size of our elements
+                boostAmp : false,
+                boostAmpDivider : 5,
 
                 mapFreqToColor : true,
                 brightColors : true,
@@ -70,10 +73,12 @@ define(
 
                 __vizType = pVizType;
 
-                _.bindAll(this, 'setUp', 'processData');
+                _.bindAll(this, 'start', 'processData');
 
                 // Gather and overwrite all options and defaults (from this class and any subclasses) into this.options
                 this.options = _.defaults(pOptions, defaultOptions);
+
+                this.setUp();
 
                 /////////////// DRAG 'N DROP //////////////////////
 //                var element = document.getElementById('container');
@@ -82,7 +87,7 @@ define(
 
 
                 /////////////// MICROPHONE //////////////////////
-                var inputSuccess = AudioUtils.setUpAudioInput(this.setUp);
+                var inputSuccess = AudioUtils.setUpAudioInput(this.start);
 
                 if(!inputSuccess){
 
@@ -95,11 +100,7 @@ define(
                 return true;
             };
 
-            // Once the file is loaded, we start getting our hands dirty.
             that.setUp = function(pArrayBuffer){
-
-                document.getElementById('instructions').innerHTML = 'Loading ...';
-                document.getElementById('canvas-container').classList.remove('phaseTwo');
 
                 // Canvas and drawing config
                 var canvas = document.getElementById('canvas');
@@ -117,16 +118,30 @@ define(
 
                 // If numElements not specified...
                 // ...we get the total number of elements based on width / spacing figuring in the fact we start [x] px in
-//                this.numDisks = Math.ceil((this.canvW - this.options.startPosX * 2) / this.options.spacing) + 1;
                 this.binSize = (this.options.numElements > 0)? this.options.numElements : Math.ceil((this.canvW - this.options.startPosX * 2) / this.options.spacing) + 1;
+                if(this.binSize < 0){
+                    this.binSize = 25;// default value if above calc fails e.g 'cos elements are centralised & drawn on top of each other
+                }
 
                 // Create a new 'audioContext'
                 this.audioCtx = new AudioContext();
 
-
                 /////////////// DRAG 'N DROP //////////////////////
                 // Set up the audio Analyser, the Source Buffer and javascriptNode
 //                this.setupAudioNodes();
+                //--------- end DRAG 'N DROP ----------------------
+
+            }
+
+            // Once the file is loaded, we start getting our hands dirty.
+            that.start = function(pArrayBuffer){
+
+                document.getElementById('instructions').innerHTML = 'Loading ...';
+                document.getElementById('canvas-container').classList.remove('phaseTwo');
+
+
+                /////////////// DRAG 'N DROP //////////////////////
+                // Set up the audio Analyser, the Source Buffer and javascriptNode
 //                AudioUtils.decodeAndPlay(pArrayBuffer, this.audioCtx, this.sourceNode, this.javascriptNode);
                 //--------- end DRAG 'N DROP ----------------------
 

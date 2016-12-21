@@ -25,45 +25,75 @@ define(
             var defaultOptions = {
 
                 // GENERAL
-                numFrequencies : 512,
-                batchModulo : 1,
+//                numFrequencies : 512,
+//                batchModulo : 1,
+//
+//                spacing : 40, // 40 for others, 20 for 'lines'
+//
+//                ampMultiplier : 0.5,
+//                boostAmp : false,
+//                boostAmpDivider : 35,
+//
+//                mapFreqToColor : true,
+//
+//                canvasFillAlpha : 0.1, //.25 for others, 0.1 for 'lines'
+//                fillStyle: [255, 255, 255],
+//                strokeStyle: [255, 255, 255],
+//
+//                linkAlphaToAmplitude : false,
+//                invertAlpha : false,
+//
+//
+//                // SPECIFIC
+//
+//                // circles
+//                renderCircles : true,
+//                numElements : 0,
+//                linkWidthToAmplitude : false,
+//                maxLineWidth: 20,
+//
+//                // intersects
+//                renderIntersects : true,
+//                drawIntersects : true, // if false & drawLines is true makes the effect formerly known as: lines
+//                intersectRadius : 2, // disregarded if drawIntersects is false
+//                doIntersectFill : true, // disregarded if drawIntersects is false
+//                doIntersectStroke : false, // disregarded if drawIntersects is false
+//
+//                drawLines : true, // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
+//                intersectLineWidth : 1,
+//                drawLineStyle : [255, 255, 255],
+//                clipLines : true // true = draw from edges of intersect circles not from centers ('dumbbell' effect)
 
-                spacing : 40, // 40 for others, 20 for 'lines'
-
-                ampMultiplier : 0.5,
-                boostAmp : false,
-                boostAmpDivider : 35,
-
-                mapFreqToColor : true,
-
-                canvasFillAlpha : 0.1, //.25 for others, 0.1 for 'lines'
-                fillStyle: [255, 255, 255],
-                strokeStyle: [255, 255, 255],
-
-                linkAlphaToAmplitude : false,
-                invertAlpha : false,
-
-
-                // SPECIFIC
-
-                // circles
-                renderCircles : true,
-                numElements : 0,
-                linkWidthToAmplitude : false,
-                maxLineWidth: 20,
-
-                // intersects
-                renderIntersects : true,
-                drawIntersects : true, // if false & drawLines is true makes the effect formerly known as: lines
-                intersectRadius : 2, // disregarded if drawIntersects is false
-                doIntersectFill : true, // disregarded if drawIntersects is false
-                doIntersectStroke : false, // disregarded if drawIntersects is false
-
-                drawLines : true, // if true makes the effect formerly known as: intersectsLines (needs fillStyle...0.1 & spacing:20)
-                intersectLineWidth : 1,
-                drawLineStyle : [255, 255, 255],
-                clipLines : true // true = draw from edges of intersect circles not from centers ('dumbbell' effect)
-
+                // centralised, slow-fading, creamy red circles. rich, sumptuous effect
+                "numFrequencies": 512,
+                "batchModulo": 1,
+                "startPosX": 600,
+                "spacing": 0,
+                "mapFreqToColor": false,
+                "brightColors": true,
+                "fillStyle": [230,207,207],
+                "strokeStyle": [107,30,30],
+                "canvasFillStyle": [210,170,170],
+                "canvasFillAlpha": 0.1,
+                "lineWidth": 5.2,
+                "linkAlphaToAmplitude": false,
+                "invertAlpha": false,
+                "ampMultiplier": 0.9,
+                "boostAmp": true,
+                "boostAmpDivider": 35,
+                "renderCircles": true,
+                "renderIntersects": false,
+                "numElements": 0,
+                "linkWidthToAmplitude": false,
+                "maxLineWidth": 20,
+                "drawIntersects": true,
+                "intersectRadius": 11.3,
+                "doIntersectFill": true,
+                "doIntersectStroke": false,
+                "drawLines": true,
+                "drawLineStyle": [255,255,255],
+                "intersectLineWidth": 1,
+                "clipLines": true
             }
 
             var lastCircle = null;

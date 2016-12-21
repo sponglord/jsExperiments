@@ -19,10 +19,11 @@ define(
                 // general
                 numFrequencies : 512,
                 batchModulo : 1,
-                canvasFillAlpha : 0.25, //.25 for others, 0.1 for 'lines'
+                canvasFillAlpha : 0.1,
 
                 // DRAW OPTIONS
-                spacing : 40, // 40 for others, 20 for 'lines'
+                numElements : 50,
+                spacing : 20,
 
                 ampMultiplier : 1,
                 boostAmp : false,
