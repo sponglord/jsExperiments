@@ -20,8 +20,9 @@ define(
                 numFrequencies : 512,
                 batchModulo : 1,
 
+                numElements : 80,
                 startPosX : 0,
-                spacing : 20,
+                spacing : 10,
                 canvasFillAlpha : 0.06,
 
                 // DRAW OPTIONS
@@ -60,7 +61,7 @@ define(
 
                 this.createImages();
 
-                return init
+                return init;
             };
 
             /////////// OVERRIDEABLE FUNCTIONS FOR SUBCLASSES TO CHANGE CORE FUNCTIONALITY /////////////
@@ -160,8 +161,6 @@ define(
                 }
 
 
-                var heads = i%2;
-
                 var img0 = _images[i];
 
                 // Give node velocity based on amplitude
@@ -173,12 +172,11 @@ define(
 
 
                 // test: draw circle coloured by frequency
-//                this.canvCtx.strokeStyle = 'rgba(' + chosenRGB[0] + ','  + chosenRGB[1] + ',' + chosenRGB[2] + ',' + alpha + ')';;
-                var rad = Utils.lerp(ampNorm, 1, 5)
-                this.canvCtx.lineWidth = 1;//rad;
-                this.canvCtx.beginPath();
-                this.canvCtx.arc(img0.x, img0.y, rad, 0, Math.PI * 2, false);
-                this.canvCtx.stroke();
+//                var rad = Utils.lerp(ampNorm, 1, 5)
+//                this.canvCtx.lineWidth = 1;//rad;
+//                this.canvCtx.beginPath();
+//                this.canvCtx.arc(img0.x, img0.y, rad, 0, Math.PI * 2, false);
+//                this.canvCtx.stroke();
 
 
                 //--
