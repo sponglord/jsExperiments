@@ -20,9 +20,9 @@ define(
                 numFrequencies : 512,
                 batchModulo : 1,
 
-                numElements : 80,
-                startPosX : 0,
-                spacing : 10,
+                numElements : 80,// TODO make a config option
+                startPosX : 10,
+                spacing : 50,
                 canvasFillAlpha : 0.06,
 
                 // DRAW OPTIONS
@@ -37,7 +37,7 @@ define(
                 lineWidth : 1,
                 strokeStyle: [255, 255, 255],
 
-                linkAlphaToAmplitude : true,
+                linkAlphaToAmplitude : false,
                 invertAlpha : true,
 
                 // specific
@@ -114,19 +114,19 @@ define(
                 //-------------------------------------------------------------------------------
 
                 /////////////// SET ALPHA /////////////////
-                var alpha = 0.2;
+                var alpha = 0.2;// TODO make a config option
 
-//                if(this.options.linkAlphaToAmplitude){
-//
-//                    // link alpha to amplitude: strongest signal = 1, weakest = 0.1
-//                    alpha = Utils.lerp(ampNorm, 0.1, 1);
+                if(this.options.linkAlphaToAmplitude){
+
+                    // link alpha to amplitude: strongest signal = 1, weakest = 0.1
+                    alpha = Utils.lerp(ampNorm, 0.1, 1);
 //
 //                    if(this.options.invertAlpha){
 //
 //                        // link alpha to amplitude, but invert: strongest signal = 0.1, weakest = 1
 //                        alpha = 1.1 - alpha;
 //                    }
-//                }
+                }
 
                 /////////////// SET COLOR /////////////////
 
@@ -158,13 +158,14 @@ define(
                     }
 
                     this.canvCtx.strokeStyle = 'rgba(' + chosenRGB[0] + ','  + chosenRGB[1] + ',' + chosenRGB[2] + ',' + alpha + ')';;
+//                    this.canvCtx.fillStyle = 'rgba(' + chosenRGB[0] + ','  + chosenRGB[1] + ',' + chosenRGB[2] + ',' + 1 + ')';;
                 }
 
 
                 var img0 = _images[i];
 
                 // Give node velocity based on amplitude
-                var vel = Utils.lerp(ampNorm, 0, 3);
+                var vel = Utils.lerp(ampNorm, 0, 3);// TODO make upper limit a config option
 
                 // if node was already moving in a particular direction - keep it moving that way.
                 img0.vx = (img0.vx >= 0)? vel : -vel;
@@ -177,31 +178,22 @@ define(
 //                this.canvCtx.beginPath();
 //                this.canvCtx.arc(img0.x, img0.y, rad, 0, Math.PI * 2, false);
 //                this.canvCtx.stroke();
-
+////                this.canvCtx.fill();
+//                return true;
 
                 //--
 
 
-//                var multiplier = this.options.ampMultiplier;
-//
-//                // Use math.log to boost size - the larger the amplitude the bigger the boost
-//                // Values 1 - 255 will give results 0 - 2.4065
-//                if(this.options.boostAmp){
-//
-//                    var log =  Math.log10(pAmplitude / this.options.boostAmpDivider);
-//                    multiplier = (log > 0 && log > this.options.ampMultiplier)? log : this.options.ampMultiplier
-//                }
+                // NODES
+                var j, img1, dx, dy, dist, maxDist, c1ax, c1ay, c2ax, c2ay, c1x, c1y, c2x, c2y, ampEffect, angleIncr;
 
-                // ARCS
-                //var i, img0;
-                var j, img1, dx, dy, dist, max = 100, c1ax, c1ay, c2ax, c2ay, c1x, c1y, c2x, c2y, oscFactor = 2, angleIncr = 0.05;
+                angleIncr = Utils.lerp(ampNorm, 0.05, 1);// TODO make config options
+                ampEffect = Utils.lerp(ampNorm, 0.1, 1.5);// TODO make config options
 
-                angleIncr = Utils.lerp(ampNorm, 0.05, 1);
+                // TODO make maxDist a config option OR link to amplitude
+                maxDist = Utils.lerp(ampNorm, 100, 200);
 
-//                for(i = 0; i < this.binSize - 1; i++){
                 if(i < this.binSize - 1){
-
-//                    img0 = _images[i];
 
                     for(j = i + 1; j < this.binSize; j++){
 
@@ -212,11 +204,11 @@ define(
 
                         dist = Math.sqrt(dx * dx + dy * dy);
 
-                        if(dist < max){
+                        if(dist < maxDist){
 
 //                            this.canvCtx.strokeStyle = 'rgba(' + strokeStyle[0] + ','  + strokeStyle[1] + ',' + strokeStyle[2] + ',' + alpha + ')';
 
-                            this.canvCtx.lineWidth = 1.0 - dist / max;
+                            this.canvCtx.lineWidth = 1 - dist / maxDist;
 
                             this.canvCtx.beginPath();
                             this.canvCtx.moveTo(img0.x, img0.y);
@@ -224,11 +216,11 @@ define(
 
 //  						        this.canvCtx.quadraticCurveTo(img1.x + dx, img0.y - dy, img1.x, img1.y);
 
-                            c1ax = Math.sin(img0.cAngleX) * dx / oscFactor;
-                            c1ay = Math.sin(img0.cAngleY) * dy / oscFactor;
+                            c1ax = Math.sin(img0.cAngleX) * (dx * ampEffect);
+                            c1ay = Math.sin(img0.cAngleY) * (dx * ampEffect);
 
-                            c2ax = Math.sin(img1.cAngleX) * dx / oscFactor;
-                            c2ay = Math.sin(img1.cAngleY) * dy / oscFactor;
+                            c2ax = Math.sin(img1.cAngleX) * (dx * ampEffect);
+                            c2ay = Math.sin(img1.cAngleY) * (dx * ampEffect);
 
                             c1x = (img1.x + dx) + c1ax;
                             c1y = (img0.y - dy) + c1ay;
@@ -248,7 +240,6 @@ define(
                     img0.cAngleY += angleIncr;
 
                 }
-
 
                 return true;
             }
@@ -277,16 +268,10 @@ define(
                         width       : _imageW,
                         height      : _imageH,
                         radius      : Math.sqrt(_imageW * _imageW + _imageH * _imageH) / 2,
-                        x           : Math.random() * this.canvW,
-                        y           : Math.random() * this.canvH,
-                        vx          : 1,//Math.random() * 6 - 3,
-                        vy          : 1,//Math.random() * 6 - 3,
-//                        column      : -1,
-//                        row         : -1,
-//                        targetX     : -1,
-//                        targetY     : -1,
-//                        inCollision : false,
-//                        inPlace     : false,
+                        x           : Math.random() * this.canvW,//this.options.startPosX + (i * this.options.spacing),// fixed position for testing
+                        y           : Math.random() * this.canvH,//this.options.startPosX + (i * this.options.spacing),//
+                        vx          : 1,
+                        vy          : 1,
                         cAngleX     : 0.01,
                         cAngleY     : 0.99
                     };
@@ -307,13 +292,9 @@ define(
 
                     img0 = _images[i];
 
-//                    img0.inCollision = false;
-
                     for(j = i + 1; j < this.binSize; j++){
 
                         img1 = _images[j];
-
-//                        img1.inCollision = false;
 
                         dx = img1.x - img0.x;
                         dy = img1.y - img0.y;
@@ -331,12 +312,6 @@ define(
                             img0.vy -= ay;
                             img1.vx += ax;
                             img1.vy += ay;
-//
-//                            img0.inCollision = true;
-//                            img1.inCollision = true;
-                        }
-                        else{
-//                            img1.inCollision = false;
                         }
                     }
                 }
@@ -344,12 +319,11 @@ define(
 
             that.move = function(img){
 
-                var bounce = -1, rad;
+                var bounce = -1, rad = 0;
 
                 img.x += img.vx;
                 img.y += img.vy;
 
-                rad = 0;
 
                 if(img.x + rad > this.canvW){
                     img.x = this.canvW - rad;
