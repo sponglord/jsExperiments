@@ -139,6 +139,11 @@ define(
                 gen.add(options, 'linkAlphaToAmplitude').onChange(function(value) {
 
                     showHideElement('invertAlpha', value);
+
+                    if(that.vizType === 'waves1'){
+                        showHideElement('invertAlpha', false);
+                    }
+
                     window.viz.optionChange('linkAlphaToAmplitude', value);
                 });
 
@@ -423,6 +428,67 @@ define(
                     rings.open();
                 }
 
+                if(this.vizType === 'waves1'){
+
+                    var waves = gui.addFolder('waves');
+
+                    waves.add(options, 'numElements', 2, 150).onChange(function(value){
+
+                        window.viz.optionChange('numElements', value);
+                    });
+
+                    waves.add(options, 'maxAlpha', 0, 1).step(0.1).onChange(function(value){
+
+                        window.viz.optionChange('maxAlpha', value);
+                    });
+
+                    waves.add(options, 'maxVelocity', 0, 10).step(0.5).onChange(function(value){
+
+                        window.viz.optionChange('maxVelocity', value);
+                    });
+
+                    waves.add(options, 'minAngleIncrement').max(1).step(0.05).onChange(function(value){
+
+                        window.viz.optionChange('minAngleIncrement', value);
+                    });
+
+                    waves.add(options, 'maxAngleIncrement').max(2).step(0.05).onChange(function(value){
+
+                        window.viz.optionChange('maxAngleIncrement', value);
+                    });
+
+                    waves.add(options, 'minAmpBoost').max(2).step(0.1).onChange(function(value){
+
+                        window.viz.optionChange('minAmpBoost', value);
+                    });
+
+                    waves.add(options, 'maxAmpBoost').max(5).step(0.1).onChange(function(value){
+
+                        window.viz.optionChange('maxAmpBoost', value);
+                    });
+
+                    waves.add(options, 'minDist').max(100).step(1).onChange(function(value){
+
+                        window.viz.optionChange('minDist', value);
+                    });
+
+                    waves.add(options, 'maxDist').max(200).step(1).onChange(function(value){
+
+                        window.viz.optionChange('maxDist', value);
+                    });
+
+//                    maxAlpha : 0.2,
+//                    maxVelocity : 3,
+//                    minAngleIncrement : 0.05,
+//                    maxAngleIncrement : 1,
+//                    minAmpBoost : 0.1,
+//                    maxAmpBoost : 1.5,
+//                    minDist : 100,
+//                    maxDist : 200
+
+                    waves.open();
+                }
+
                 // Start closed
 //                gui.closed = true;
 
@@ -477,6 +543,14 @@ define(
                     __hideArray.push('startPosX');
                     __hideArray.push('lineWidth');
                     __hideArray.push('boostAmp');
+                }
+
+                if(this.vizType === 'waves1'){
+
+                    __hideArray.push('invertAlpha');
+                    __hideArray.push('ampMultiplier');
+                    __hideArray.push('boostAmp');
+                    __hideArray.push('lineWidth');
                 }
 
 

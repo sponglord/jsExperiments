@@ -20,16 +20,16 @@ define(
                 numFrequencies : 512,
                 batchModulo : 1,
 
-                numElements : 80,// TODO make a config option
+                numElements : 80,
                 startPosX : 10,
                 spacing : 50,
                 canvasFillAlpha : 0.06,
 
                 // DRAW OPTIONS
 
-                ampMultiplier : 0.2,
-                boostAmp : false,
-                boostAmpDivider : 5,
+//                ampMultiplier : 0.2,
+//                boostAmp : false,
+//                boostAmpDivider : 5,
 
                 mapFreqToColor : true,
                 brightColors : true,
@@ -38,11 +38,17 @@ define(
                 strokeStyle: [255, 255, 255],
 
                 linkAlphaToAmplitude : false,
-                invertAlpha : true,
+//                invertAlpha : false,
 
                 // specific
-                linkWidthToAmplitude : false,
-                maxLineWidth: 20
+                maxAlpha : 0.2,
+                maxVelocity : 3,
+                minAngleIncrement : 0.05,
+                maxAngleIncrement : 1,
+                minAmpBoost : 0.1,
+                maxAmpBoost : 1.5,
+                minDist : 100,
+                maxDist : 200
             }
 
             var _imageW = 30, _imageH = 30, _images = [];
@@ -114,12 +120,12 @@ define(
                 //-------------------------------------------------------------------------------
 
                 /////////////// SET ALPHA /////////////////
-                var alpha = 0.2;// TODO make a config option
+                var alpha = this.options.maxAlpha;
 
                 if(this.options.linkAlphaToAmplitude){
 
                     // link alpha to amplitude: strongest signal = 1, weakest = 0.1
-                    alpha = Utils.lerp(ampNorm, 0.1, 1);
+                    alpha = Utils.lerp(ampNorm, 0.1, alpha);
 //
 //                    if(this.options.invertAlpha){
 //
@@ -165,7 +171,7 @@ define(
                 var img0 = _images[i];
 
                 // Give node velocity based on amplitude
-                var vel = Utils.lerp(ampNorm, 0, 3);// TODO make upper limit a config option
+                var vel = Utils.lerp(ampNorm, 0, this.options.maxVelocity);
 
                 // if node was already moving in a particular direction - keep it moving that way.
                 img0.vx = (img0.vx >= 0)? vel : -vel;
@@ -187,11 +193,10 @@ define(
                 // NODES
                 var j, img1, dx, dy, dist, maxDist, c1ax, c1ay, c2ax, c2ay, c1x, c1y, c2x, c2y, ampEffect, angleIncr;
 
-                angleIncr = Utils.lerp(ampNorm, 0.05, 1);// TODO make config options
-                ampEffect = Utils.lerp(ampNorm, 0.1, 1.5);// TODO make config options
+                angleIncr = Utils.lerp(ampNorm, this.options.minAngleIncrement, this.options.maxAngleIncrement);
+                ampEffect = Utils.lerp(ampNorm, this.options.minAmpBoost, this.options.maxAmpBoost);
 
-                // TODO make maxDist a config option OR link to amplitude
-                maxDist = Utils.lerp(ampNorm, 100, 200);
+                maxDist = Utils.lerp(ampNorm, this.options.minDist, this.options.maxDist);
 
                 if(i < this.binSize - 1){
 
@@ -244,19 +249,21 @@ define(
                 return true;
             }
 
-//            that.optionChange = function(pOpt, pVal){
-//
-//                __super.optionChange(pOpt, pVal);
-//
-//                switch(pOpt){
-//
-//                    case 'numElements':
-//
-//                        this.binSize = this.options.numElements = pVal;
-//
-//                        break
-//                }
-//            };
+            that.optionChange = function(pOpt, pVal){
+
+                __super.optionChange(pOpt, pVal);
+
+                switch(pOpt){
+
+                    case 'numElements':
+
+                        this.binSize = this.options.numElements = pVal;
+                        _images = [];
+                        that.createImages();
+
+                        break
+                }
+            };
 
             that.createImages = function(){
 
@@ -268,10 +275,12 @@ define(
                         width       : _imageW,
                         height      : _imageH,
                         radius      : Math.sqrt(_imageW * _imageW + _imageH * _imageH) / 2,
+//                        x           : this.options.startPosX + (i * this.options.spacing),// fixed position for testing
+//                        y           : this.options.startPosX + (i * this.options.spacing),//
                         x           : Math.random() * this.canvW,//this.options.startPosX + (i * this.options.spacing),// fixed position for testing
                         y           : Math.random() * this.canvH,//this.options.startPosX + (i * this.options.spacing),//
-                        vx          : 1,
-                        vy          : 1,
+                        vx          : ( (Math.round(Math.random() + 1) - 1) === 1)? 1 : -1,
+                        vy          : ( (Math.round(Math.random() + 1) - 1) === 1)? 1 : -1,
                         cAngleX     : 0.01,
                         cAngleY     : 0.99
                     };
