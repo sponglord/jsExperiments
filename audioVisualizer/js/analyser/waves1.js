@@ -3,11 +3,13 @@ define(
     [
         'utils/ObjectSuper',
         'avBase',
-        'utils/utils2'
+        'utils/utils2',
+        'jquery'
     ],
     function(objectSuper,
              baseCode,
-             Utils
+             Utils,
+             $jq
     ){
 
         "use strict";
@@ -60,8 +62,17 @@ define(
             that.init = function(pVizType){
 
                 var canvas = document.getElementById('canvas');
-                canvas.width = 500
-                canvas.height = 500
+                canvas.width = 800;
+                canvas.height = 600;
+
+                // swimming pool effect
+//                $jq('body').css('background-color', '#1bdada');
+//                $jq('#container').css('background-color', '#1bdada');
+//                defaultOptions.canvasFillStyle = [27, 218, 218];
+//                defaultOptions.canvasFillAlpha = 0.25;
+//                defaultOptions.numElements = 145;
+//                defaultOptions.mapFreqToColor = false;
+                //--
 
                 var init = __super.init(pVizType);
 

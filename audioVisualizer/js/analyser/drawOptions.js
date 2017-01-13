@@ -3,12 +3,14 @@ define(
     [
         'datgui',
         'jquery',
-        'lodash'
+        'lodash',
+        'utils/utils2'
     ],
     function(
         dat,
         $jq,
-        _
+        _,
+        Utils
     ){
 
         "use strict";
@@ -124,6 +126,9 @@ define(
                     // - which doesn't play well with setting the css rgba property... so first round the values
                     var roundVals = [ Math.round(value[0]), Math.round(value[1]), Math.round(value[2]) ];
                     window.viz.optionChange('canvasFillStyle', roundVals);
+
+//                    $jq('body').css('background-color', Utils.rgbToHEX(roundVals));
+//                    $jq('#container').css('background-color', Utils.rgbToHEX(roundVals));
                 });
 
                 gen.add(options, 'canvasFillAlpha', 0.05, 1).step(0.05).onChange(function(value) {
@@ -512,20 +517,20 @@ define(
 
                 if(this.vizType === 'barloop'){
 
-                    __hideArray.push('spacing')
-                    __hideArray.push('fillStyle')
+                    __hideArray.push('spacing');
+                    __hideArray.push('fillStyle');
                 }
 
                 if(this.vizType === 'bars'){
 
-                    __hideArray.push('fillStyle')
+                    __hideArray.push('fillStyle');
                     __hideArray.push('lineWidth');
                 }
 
                 if(this.vizType === 'star'){
 
-                    __hideArray.push('spacing')
-                    __hideArray.push('fillStyle')
+                    __hideArray.push('spacing');
+                    __hideArray.push('fillStyle');
                     __hideArray.push('lineWidth');
                 }
 
@@ -551,6 +556,7 @@ define(
                     __hideArray.push('ampMultiplier');
                     __hideArray.push('boostAmp');
                     __hideArray.push('lineWidth');
+                    __hideArray.push('fillStyle');
                 }
 
 
