@@ -452,20 +452,20 @@ define(
                         window.viz.optionChange('maxVelocity', value);
                     });
 
-                    waves.add(options, 'minAngleIncrement').max(1).step(0.05).onChange(function(value){
-
-                        window.viz.optionChange('minAngleIncrement', value);
-                    });
+//                    waves.add(options, 'minAngleIncrement').max(1).step(0.05).onChange(function(value){
+//
+//                        window.viz.optionChange('minAngleIncrement', value);
+//                    });
 
                     waves.add(options, 'maxAngleIncrement').max(2).step(0.05).onChange(function(value){
 
                         window.viz.optionChange('maxAngleIncrement', value);
                     });
 
-                    waves.add(options, 'minAmpBoost').max(2).step(0.1).onChange(function(value){
-
-                        window.viz.optionChange('minAmpBoost', value);
-                    });
+//                    waves.add(options, 'minAmpBoost').max(2).step(0.1).onChange(function(value){
+//
+//                        window.viz.optionChange('minAmpBoost', value);
+//                    });
 
                     waves.add(options, 'maxAmpBoost').max(5).step(0.1).onChange(function(value){
 

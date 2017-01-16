@@ -4,11 +4,13 @@ define(
         'utils/ObjectSuper',
         'avBase',
         'utils/utils2',
+        'chroma',
         'jquery'
     ],
     function(objectSuper,
              baseCode,
              Utils,
+             Chroma,
              $jq
     ){
 
@@ -22,7 +24,7 @@ define(
                 numFrequencies : 512,
                 batchModulo : 1,
 
-                numElements : 80,
+                numElements : 100,
                 startPosX : 10,
                 spacing : 50,
                 canvasFillAlpha : 0.06,
@@ -35,6 +37,7 @@ define(
 
                 mapFreqToColor : true,
                 brightColors : true,
+                useChroma : true,
 
                 lineWidth : 1,
                 strokeStyle: [255, 255, 255],
@@ -54,6 +57,19 @@ define(
             }
 
             var _imageW = 30, _imageH = 30, _images = [];
+
+//            var _colorScale = new Chroma.scale(['black', 'red', 'yellow', 'white']).out('rgb');
+            var _colorScale = new Chroma.scale(['green', 'cyan', 'white']).out('rgb');
+
+//            var colC = _colorScale(0.5);
+//            var roundVals = [ Math.round(colC[0]), Math.round(colC[1]), Math.round(colC[2]) ];
+//            var colC2 = Chroma(colC).alpha(0.5);
+//            if(window.console && console.log){
+//                console.log('### waves1::analyser:: Chroma col=',colC);
+//                console.log('### waves1::analyser:: Chroma col rounded=',roundVals);
+//                console.log('### waves1::analyser:: Chroma col2=',colC2);
+//            }
+////            $jq('body').css('background-color', colC2);
 
             var that = baseCode(defaultOptions);
 
@@ -157,25 +173,40 @@ define(
                     // normalise the frequency within the full frequency range (0 - 511)
                     var freqNorm = Utils.normalize(pFreqIndex, 0, pNumSamples - 1);
 
-                    // hue
-                    var hue = Math.floor(Utils.lerp(freqNorm, 0, 360));
 
-                    // saturation & brightnesss
-                    var sat = Math.floor(Utils.lerp(ampNorm, 40, 100));// TODO make 2nd param an option?
-                    var bright = Math.floor(Utils.lerp(ampNorm, 50, 100));
+                    if(this.options.useChroma){
 
-                    var rgb = Utils.hsvToRGB([hue, sat, bright]);
-                    var rgbBright = Utils.hsvToRGB([hue, 100, 100]);
+                        // Chroma.js
+                        var col = _colorScale(freqNorm);
+                        var roundColVals = [ Math.round(col[0]), Math.round(col[1]), Math.round(col[2]) ];
+    //                    var colC2 = Chroma(colC).alpha(0.5);
 
-                    chosenRGB = rgb;
+                        chosenRGB = roundColVals;
 
-                    if(this.options.brightColors){
+                    }else{
 
-                        chosenRGB = rgbBright;
+                        // hue
+                        var hue = Math.floor(Utils.lerp(freqNorm, 0, 360));
+
+                        // saturation & brightnesss
+                        var sat = Math.floor(Utils.lerp(ampNorm, 40, 100));// TODO make 2nd param an option?
+                        var bright = Math.floor(Utils.lerp(ampNorm, 50, 100));
+
+                        var rgb = Utils.hsvToRGB([hue, sat, bright]);
+                        var rgbBright = Utils.hsvToRGB([hue, 100, 100]);
+
+
+                        chosenRGB = rgb;
+
+                        if(this.options.brightColors){
+
+                            chosenRGB = rgbBright;
+                        }
                     }
 
+
                     this.canvCtx.strokeStyle = 'rgba(' + chosenRGB[0] + ','  + chosenRGB[1] + ',' + chosenRGB[2] + ',' + alpha + ')';;
-//                    this.canvCtx.fillStyle = 'rgba(' + chosenRGB[0] + ','  + chosenRGB[1] + ',' + chosenRGB[2] + ',' + 1 + ')';;
+//                    this.canvCtx.fillStyle = 'rgba(' + chosenRGB[0] + ','  + chosenRGB[1] + ',' + chosenRGB[2] + ',' + 1 + ')';// for TESTING
                 }
 
 

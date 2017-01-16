@@ -12,6 +12,7 @@ require.config({
         lodash: 'lib/lodash/lodash.4.10.0',
         jquery: 'lib/jquery-3.1.1.min',
         datgui : '../js/lib/datgui/dat.gui',
+        chroma : '../js/lib/chromaJS/chroma',
         avBase : 'analyser/baseCode'
     }
 });
